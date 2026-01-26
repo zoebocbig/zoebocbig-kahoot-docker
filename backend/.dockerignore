@@ -1,0 +1,10 @@
+node_modules
+.yaml
+.git
+.gitignore
+.env
+.vscode
+.vs
+.Dockerfile
+__pycache__
+*.pyc

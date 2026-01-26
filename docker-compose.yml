@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  backend:
+    build: 
+      context: ./backend
+    ports:
+      - "5000:5000"   
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"   
+    environment:
+      - CHOKIDAR_USEPOLLING=true   
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
