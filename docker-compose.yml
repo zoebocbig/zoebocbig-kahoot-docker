@@ -4,8 +4,8 @@ services:
   backend:
     build: ./backend
     container_name: backend
-    ports:
-      - "5001:5000"  # accessible depuis Nginx
+    expose:
+      - "5000"  # accessible par Nginx via le réseau
     networks:
       - app-network
 
@@ -13,7 +13,7 @@ services:
     build: ./frontend
     container_name: frontend
     ports:
-      - "5000:80"    # localhost:5000 -> Nginx
+      - "5000:80"  # localhost:5000 → Nginx
     depends_on:
       - backend
     networks:

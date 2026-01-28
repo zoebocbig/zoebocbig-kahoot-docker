@@ -13,11 +13,7 @@ app = Flask(
 
 init_db()
 
-@app.route("/api/home")
-def kahoot():
-    return jsonify({
-        "message": "Backend Kahoot opérationnel"
-    })
+
 
 @app.route("/api/questions")
 def questions():
