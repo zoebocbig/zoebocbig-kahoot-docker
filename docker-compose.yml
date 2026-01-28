@@ -4,20 +4,13 @@ services:
   backend:
     build: ./backend
     container_name: backend
-    expose:
-      - "5000"  # accessible par Nginx via le réseau
+    ports:
+      - "5000:5000"   # API + frontend React si servi par Flask
+    volumes:
+      - ./backend:/app   # Pour dev live sur backend
     networks:
       - app-network
 
-  frontend:
-    build: ./frontend
-    container_name: frontend
-    ports:
-      - "5000:80"  # localhost:5000 → Nginx
-    depends_on:
-      - backend
-    networks:
-      - app-network
 
 networks:
   app-network:

@@ -7,10 +7,9 @@ load_dotenv()
 
 app = Flask(
     __name__,
-    static_folder="../frontend/dist",
+    static_folder="frontend/dist",
     static_url_path=""
 )
-
 init_db()
 
 
