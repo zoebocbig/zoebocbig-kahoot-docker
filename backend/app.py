@@ -1,25 +1,23 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 import os
-import requests
 from dotenv import load_dotenv
 from database import init_db, get_questions, add_question
 
-
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="../frontend/dist",
+    static_url_path=""
+)
+
 init_db()
-
-API_KEY = os.getenv("API_KEY")
-
-
 
 @app.route("/api/home")
 def kahoot():
-   return jsonify({
+    return jsonify({
         "message": "Backend Kahoot opérationnel"
     })
-
 
 @app.route("/api/questions")
 def questions():
@@ -29,6 +27,11 @@ def questions():
 def add():
     add_question("Capitale de la France ?", "Paris")
     return "Question ajoutée"
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_react(path):
+    return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
