@@ -2,27 +2,37 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Quiz App - Accueil</title>
-    <link rel="stylesheet" href="home.css">
+    <title>🎮 Kahoot Clone</title>
+    <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎮 Rejoindre un Quiz</h1>
+<div class="container">
+    <h1>🎉 Bienvenue sur Kahoot Clone</h1>
 
-        <form id="quizForm">
-            <label for="username">Pseudo</label>
-            <input type="text" id="username" name="username" required>
-
-            <label for="quizCode">Code du quiz</label>
-            <input type="text" id="quizCode" name="quizCode" required>
-
-            <button type="submit">Rejoindre</button>
+    <!-- Créer un quiz -->
+    <div class="card">
+        <h2>Créer un Quiz</h2>
+        <form id="createForm">
+            <input type="text" id="roomName" placeholder="Nom du quiz" required>
+            <input type="text" id="roomCode" placeholder="Code du quiz" required>
+            <button type="submit">Créer</button>
         </form>
-
-        <p id="message"></p>
     </div>
 
-    <script src="home.js"></script>
+    <!-- Rejoindre un quiz -->
+    <div class="card">
+        <h2>Rejoindre un Quiz</h2>
+        <form id="joinForm">
+            <input type="text" id="username" placeholder="Pseudo" required>
+            <input type="text" id="joinCode" placeholder="Code du quiz" required>
+            <button type="submit">Rejoindre</button>
+        </form>
+    </div>
+
+    <p id="message"></p>
+</div>
+
+<script src="js/home.js"></script>
 </body>
 </html>

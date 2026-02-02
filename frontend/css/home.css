@@ -1,64 +1,69 @@
 * {
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    height: 100vh;
     margin: 0;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
 }
 
 .container {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 320px;
+    width: 400px;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 h1 {
+    color: white;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
     margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-label {
-    text-align: left;
-    margin-top: 10px;
-    font-weight: bold;
+.card h2 {
+    margin-bottom: 15px;
+    color: #2575fc;
 }
 
 input {
+    width: 100%;
     padding: 10px;
-    margin-top: 5px;
-    border-radius: 5px;
+    margin: 8px 0;
+    border-radius: 6px;
     border: 1px solid #ccc;
+    font-size: 14px;
 }
 
 button {
-    margin-top: 20px;
+    width: 100%;
     padding: 12px;
+    margin-top: 10px;
     border: none;
-    border-radius: 5px;
-    background-color: #2575fc;
+    border-radius: 6px;
+    background: #2575fc;
     color: white;
     font-size: 16px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
 button:hover {
-    background-color: #1a5edb;
+    background: #1a5edb;
 }
 
 #message {
     margin-top: 15px;
-    color: red;
+    font-weight: bold;
+    color: #ff4444;
 }
