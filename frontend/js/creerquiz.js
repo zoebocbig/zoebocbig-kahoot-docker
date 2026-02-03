@@ -35,14 +35,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.quiz-item').forEach(q => q.classList.remove('active'));
                 newQuiz.classList.add('active');
 
-                
+                // Créer l'éditeur de quiz
                 mainContent.innerHTML = '';
-                const title = document.createElement('h1');
-                title.textContent = type === 'quiz' ? 'Éditeur de Quiz' : 'Éditeur Vrai ou Faux';
-                const desc = document.createElement('p');
-                desc.textContent = 'Ici tu peux éditer ton quiz ' + (type === 'quiz' ? '' : 'Vrai ou Faux') + '.';
-                mainContent.appendChild(title);
-                mainContent.appendChild(desc);
+                const editor = document.createElement('div');
+                editor.className = 'quiz-editor';
+
+                // Champ question
+                const questionInput = document.createElement('input');
+                questionInput.type = 'text';
+                questionInput.placeholder = 'Écris ta question ici...';
+                editor.appendChild(questionInput);
+
+                // Zone image
+                const imageInput = document.createElement('input');
+                imageInput.type = 'file';
+                imageInput.accept = 'image/*';
+                editor.appendChild(imageInput);
+
+                const imagePreview = document.createElement('img');
+                imagePreview.style.display = 'none';
+                editor.appendChild(imagePreview);
+
+                imageInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if(file) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            imagePreview.src = ev.target.result;
+                            imagePreview.style.display = 'block';
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                // Réponses
+                const answersContainer = document.createElement('div');
+                answersContainer.className = 'answers';
+                editor.appendChild(answersContainer);
+
+                const addAnswerBtn = document.createElement('button');
+                addAnswerBtn.className = 'add-answer-btn';
+                addAnswerBtn.textContent = 'Ajouter une réponse';
+                editor.appendChild(addAnswerBtn);
+
+                addAnswerBtn.addEventListener('click', () => {
+                    const answerInput = document.createElement('input');
+                    answerInput.type = 'text';
+                    answerInput.placeholder = 'Nouvelle réponse...';
+                    answersContainer.appendChild(answerInput);
+                });
+
+                mainContent.appendChild(editor);
             });
 
             modal.style.display = 'none';

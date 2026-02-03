@@ -90,6 +90,54 @@
     background-color: #9b30ff;
 }
 
+#quizList .quiz-item.active {
+    border: 2px solid #ffeb3b;
+    background-color: #9b30ff;
+}
+
+/* Formulaire de quiz */
+.quiz-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quiz-editor input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.quiz-editor img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.quiz-editor button.add-answer-btn {
+    padding: 10px;
+    border: none;
+    background-color: #33c1ff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.quiz-editor .answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quiz-editor .answers input {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
 
 .modal-btn[data-type="quiz"] { background-color: #33c1ff; color: #fff; }
 .modal-btn[data-type="vrai-faux"] { background-color: #ff5733; color: #fff; }
