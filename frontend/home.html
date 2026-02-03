@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Kahoot Clone</title>
-<link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 
-<header >
+<!-- TOP BAR -->
+<header class="top-bar">
+    <div class="logo">Kahoot<span>!</span></div>
+
+    <div class="top-buttons">
+        <button class="btn create">Créer</button>
+        <button class="btn learn">Apprentissage</button>
+    </div>
 </header>
 
+<!-- MAIN -->
 <main class="main">
     <div class="container">
         <h1>Kahoot<span>!</span></h1>
 
         <form id="joinForm">
-            <input 
-                type="text" 
-                id="roomCode" 
-                placeholder="Code PIN du jeu"
-                required
-            >
+            <input type="text" placeholder="Code PIN du jeu" required>
             <button type="submit">Valider</button>
         </form>
 

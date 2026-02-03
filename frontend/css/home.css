@@ -1,4 +1,4 @@
-/* Reset */
+/* RESET */
 * {
     margin: 0;
     padding: 0;
@@ -6,21 +6,69 @@
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* Background */
+/* BACKGROUND */
 body {
     height: 100vh;
-    background: radial-gradient(
-        circle at top right,
-        #7b2cff,
-        #5a189a,
-        #3c096c
-    );
+    background: radial-gradient(circle at top right, #7b2cff, #5a189a, #3c096c);
+    color: white;
+}
+
+/* TOP BAR */
+.top-bar {
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #ffcc00;
+}
+
+/* TOP BUTTONS */
+.top-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+}
+
+.btn.create {
+    background: #e21b3c;
+}
+
+.btn.learn {
+    background: #f2a900;
+    color: black;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* MAIN CENTER */
+.main {
+    height: calc(100vh - 60px);
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Card (formulaire) */
+/* FORM CARD */
 .container {
     background: white;
     width: 360px;
@@ -28,21 +76,20 @@ body {
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    color: black;
 }
 
-/* Title */
 .container h1 {
     font-size: 38px;
     font-weight: 900;
     margin-bottom: 25px;
-    color: #333;
 }
 
 .container h1 span {
     color: #ffcc00;
 }
 
-/* Input */
+/* INPUT */
 .container input {
     width: 100%;
     padding: 14px;
@@ -51,34 +98,24 @@ body {
     border: 2px solid #ddd;
     margin-bottom: 15px;
     text-align: center;
-    transition: border 0.2s;
 }
 
-.container input:focus {
-    outline: none;
-    border-color: #7b2cff;
-}
-
-/* Button */
+/* BUTTON */
 .container button {
     width: 100%;
     padding: 14px;
-    font-size: 18px;
-    font-weight: bold;
     background: #333;
     color: white;
+    font-size: 18px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
 }
 
 .container button:hover {
     background: #000;
-    transform: translateY(-1px);
 }
 
-/* Message */
 #message {
     margin-top: 15px;
     font-size: 14px;

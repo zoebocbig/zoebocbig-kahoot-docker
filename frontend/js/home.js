@@ -35,4 +35,14 @@ form.addEventListener("submit", async (e) => {
         message.textContent = "Serveur indisponible";
         console.error(err);
     }
+
 });
+
+document.querySelector(".create").onclick = () => {
+    window.location.href = "/create.html";
+};
+
+document.querySelector(".learn").onclick = () => {
+    window.location.href = "/learn.html";
+};
+
