@@ -85,5 +85,11 @@
     cursor: pointer;
 }
 
+#quizList .quiz-item.active {
+    border: 2px solid #ffeb3b;
+    background-color: #9b30ff;
+}
+
+
 .modal-btn[data-type="quiz"] { background-color: #33c1ff; color: #fff; }
 .modal-btn[data-type="vrai-faux"] { background-color: #ff5733; color: #fff; }
