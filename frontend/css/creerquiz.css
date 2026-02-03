@@ -165,3 +165,27 @@
     justify-content: space-between;
     align-items: center;
 }
+
+.settings-column {
+    border-left: 2px solid #ccc;
+    padding-left: 20px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-column label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.settings-column input,
+.settings-column select {
+    width: 100%;
+    padding: 5px 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}

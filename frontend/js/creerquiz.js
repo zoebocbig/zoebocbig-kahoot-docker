@@ -19,62 +19,59 @@ document.addEventListener('DOMContentLoaded', () => {
     modalBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
-            const quiz = { type, questions: [{ text: "", image: null, answers: [] }] };
+            const quiz = { type, questions: [{ text: "", image: null, answers: [] }], settings: { timeLimit: 30, scoring: 'points fixes', answerLimit: 1 } };
             quizzes.push(quiz);
             const quizIndex = quizzes.length - 1;
 
+            // Création de la diapo
             const newQuiz = document.createElement('div');
-        newQuiz.className = 'quiz-item';
-        newQuiz.textContent = type === 'quiz' ? 'Nouveau Quiz' : 'Nouveau Vrai ou Faux';
+            newQuiz.className = 'quiz-item';
+            newQuiz.textContent = type === 'quiz' ? 'Nouveau Quiz' : 'Nouveau Vrai ou Faux';
+            newQuiz.style.display = 'flex';
+            newQuiz.style.justifyContent = 'space-between';
+            newQuiz.style.alignItems = 'center';
 
-        // Création du bouton supprimer
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '×'; // petit X
-        deleteBtn.style.marginLeft = '10px';
-        deleteBtn.style.background = 'transparent';
-        deleteBtn.style.border = 'none';
-        deleteBtn.style.color = '#fff';
-        deleteBtn.style.cursor = 'pointer';
-        deleteBtn.style.fontWeight = 'bold';
-        deleteBtn.style.fontSize = '16px';
-
-        // Action du bouton supprimer
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // empêche le clic de sélectionner la slide
-            quizzes.splice(quizIndex, 1); // supprime du tableau
-            quizList.removeChild(newQuiz); // supprime de la sidebar
-
-        // Si la slide affichée était celle supprimée
-        if(currentQuizIndex === quizIndex) {
-            mainContent.innerHTML = '<h1>Créer ton quiz</h1><p>Selectionne un quiz dans la colonne de gauche pour le modifier.</p>';
-            currentQuizIndex = null;
-        }
-    });
-
-    // Ajouter le bouton à la slide
-    newQuiz.appendChild(deleteBtn);
-
-    // Ajouter la diapo à la sidebar
-    quizList.appendChild(newQuiz);
-
-
-                newQuiz.addEventListener('click', () => showQuiz(quizIndex));
-
-                modal.style.display = 'none';
+            // Bouton supprimer
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '×';
+            deleteBtn.style.marginLeft = '10px';
+            deleteBtn.style.background = 'transparent';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.color = '#fff';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.fontWeight = 'bold';
+            deleteBtn.style.fontSize = '16px';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                quizzes.splice(quizIndex, 1);
+                quizList.removeChild(newQuiz);
+                if(currentQuizIndex === quizIndex) {
+                    mainContent.innerHTML = '<h1>Créer ton quiz</h1><p>Selectionne un quiz dans la colonne de gauche pour le modifier.</p>';
+                    currentQuizIndex = null;
+                }
             });
+            newQuiz.appendChild(deleteBtn);
+            quizList.appendChild(newQuiz);
+
+            // Cliquer sur la diapo pour l’éditer
+            newQuiz.addEventListener('click', () => showQuiz(quizIndex));
+
+            modal.style.display = 'none';
         });
+    });
 
     function showQuiz(quizIndex) {
         currentQuizIndex = quizIndex;
         document.querySelectorAll('.quiz-item').forEach(q => q.classList.remove('active'));
         quizList.children[quizIndex].classList.add('active');
 
-        mainContent.innerHTML = '';
+        const quiz = quizzes[quizIndex];
+        const question = quiz.questions[0];
+
+        // Éditeur principal
         const editor = document.createElement('div');
         editor.className = 'quiz-editor';
-
-        const quiz = quizzes[quizIndex];
-        const question = quiz.questions[0]; // ici on prend la première question
+        editor.style.flex = '1';
 
         // Question
         const questionInput = document.createElement('input');
@@ -164,6 +161,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         editor.appendChild(addAnswerBtn);
 
-        mainContent.appendChild(editor);
+        // Colonne des réglages (droite)
+        const settingsColumn = document.createElement('div');
+        settingsColumn.className = 'settings-column';
+
+        // Temps de réponse
+        const timeLabel = document.createElement('label');
+        timeLabel.textContent = 'Temps de réponse (secondes)';
+        const timeInput = document.createElement('input');
+        timeInput.type = 'number';
+        timeInput.min = 5;
+        timeInput.value = quiz.settings.timeLimit;
+        timeInput.addEventListener('input', () => quiz.settings.timeLimit = parseInt(timeInput.value));
+        settingsColumn.appendChild(timeLabel);
+        settingsColumn.appendChild(timeInput);
+
+        // Fonctionnement des points
+        const scoringLabel = document.createElement('label');
+        scoringLabel.textContent = 'Fonctionnement des points';
+        const scoringSelect = document.createElement('select');
+        ['points fixes','points dégressifs'].forEach(optText => {
+            const opt = document.createElement('option');
+            opt.value = optText;
+            opt.textContent = optText;
+            if(optText === quiz.settings.scoring) opt.selected = true;
+            scoringSelect.appendChild(opt);
+        });
+        scoringSelect.addEventListener('change', () => quiz.settings.scoring = scoringSelect.value);
+        settingsColumn.appendChild(scoringLabel);
+        settingsColumn.appendChild(scoringSelect);
+
+        // Limite de réponses
+        const limitLabel = document.createElement('label');
+        limitLabel.textContent = 'Limite de réponses';
+        const limitInput = document.createElement('input');
+        limitInput.type = 'number';
+        limitInput.min = 1;
+        limitInput.max = 4;
+        limitInput.value = quiz.settings.answerLimit;
+        limitInput.addEventListener('input', () => quiz.settings.answerLimit = parseInt(limitInput.value));
+        settingsColumn.appendChild(limitLabel);
+        settingsColumn.appendChild(limitInput);
+
+        // Container principal : éditeur + colonne
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.gap = '20px';
+        container.appendChild(editor);
+        container.appendChild(settingsColumn);
+
+        mainContent.innerHTML = '';
+        mainContent.appendChild(container);
     }
 });
