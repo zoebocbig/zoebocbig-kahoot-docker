@@ -1,4 +1,4 @@
-const form = document.getElementById("joinForm");
+const form = document.getElementById("createForm");
 const message = document.getElementById("message");
 
 const API_URL = "http://backend:5000/api";
@@ -7,42 +7,38 @@ const API_KEY = "TA_CLE_API_ICI";
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const roomName = document.getElementById("roomName").value;
     const roomCode = document.getElementById("roomCode").value;
 
     try {
-        const res = await fetch(`${API_URL}/join-quiz`, {
+        const res = await fetch(`${API_URL}/create-room`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "x-api-key": API_KEY
             },
-            body: JSON.stringify({
-                username: "Player",
-                roomCode: roomCode
-            })
+            body: JSON.stringify({ roomName, roomCode })
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-            message.textContent = data.message || "Erreur";
+            message.style.color = "red";
+            message.textContent = data.message;
             return;
         }
 
-        window.location.href = `/quiz.html?roomCode=${roomCode}`;
+        message.style.color = "green";
+        message.textContent = "Quiz créé avec succès 🎉";
+
+        // Redirection vers le home après création
+        setTimeout(() => {
+            window.location.href = "/home.html";
+        }, 1500);
 
     } catch (err) {
+        message.style.color = "red";
         message.textContent = "Serveur indisponible";
         console.error(err);
     }
-
 });
-
-document.querySelector(".create").addEventListener("click", () => {
-    window.location.href = "/creer.html";
-});
-
-document.querySelector(".learn").onclick = () => {
-    window.location.href = "/learn.html";
-};
-

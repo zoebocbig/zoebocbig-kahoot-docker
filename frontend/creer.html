@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un Quiz</title>
+    <link rel="stylesheet" href="css/creer.css">
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="logo">Kahoot<span>!</span></div>
+</header>
+
+<main class="main">
+    <div class="container">
+        <h1>Créer un quiz</h1>
+
+        <form id="createForm">
+            <input type="text" id="roomName" placeholder="Nom du quiz" required>
+            <input type="text" id="roomCode" placeholder="Code PIN" required>
+
+            <button type="submit">Créer</button>
+        </form>
+
+        <p id="message"></p>
+    </div>
+</main>
+
+<script src="js/creer.js"></script>
+</body>
+</html>
