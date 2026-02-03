@@ -95,7 +95,6 @@
     background-color: #9b30ff;
 }
 
-/* Formulaire de quiz */
 .quiz-editor {
     display: flex;
     flex-direction: column;
@@ -116,7 +115,8 @@
     margin: 10px 0;
 }
 
-.quiz-editor button.add-answer-btn {
+.quiz-editor button.add-answer-btn,
+.quiz-editor button.launch-quiz-btn {
     padding: 10px;
     border: none;
     background-color: #33c1ff;
@@ -136,6 +136,32 @@
     border-radius: 5px;
     border: 1px solid #ccc;
     width: 100%;
+}
+
+/* Quiz interactif style */
+.quiz-question {
+    margin-bottom: 20px;
+}
+
+.quiz-answer-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.quiz-answer-btn.correct {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.quiz-answer-btn.wrong {
+    background-color: #f44336;
+    color: #fff;
 }
 
 
