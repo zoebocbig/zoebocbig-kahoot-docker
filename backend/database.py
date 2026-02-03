@@ -1,51 +1,30 @@
-import sqlite3
-
-def get_connection():
-    conn = sqlite3.connect("kahoot.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+# database.py
+rooms = {}  # { room_code: {"name": "Nom du quiz", "users": [], "questions": [] } }
 
 def init_db():
-    conn = get_connection()
-    cursor = conn.cursor()
+    global rooms
+    rooms = {}
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL
-    )
-    """)
+def create_room(room_code, room_name):
+    if room_code in rooms:
+        return False
+    rooms[room_code] = {"name": room_name, "users": [], "questions": []}
+    return True
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS questions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        question TEXT NOT NULL,
-        answer TEXT NOT NULL
-    )
-    """)
+def join_room(room_code, username):
+    if room_code not in rooms:
+        return False
+    if username not in rooms[room_code]["users"]:
+        rooms[room_code]["users"].append(username)
+    return True
 
-    conn.commit()
-    conn.close()
-    
-def add_question(question, answer):
-    conn = get_connection()
-    cursor = conn.cursor()
+def add_question(room_code, question, answer):
+    if room_code not in rooms:
+        return False
+    rooms[room_code]["questions"].append({"question": question, "answer": answer})
+    return True
 
-    cursor.execute(
-        "INSERT INTO questions (question, answer) VALUES (?, ?)",
-        (question, answer)
-    )
-
-    conn.commit()
-    conn.close()
-
-def get_questions():
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM questions")
-    rows = cursor.fetchall()
-
-    conn.close()
-    return [dict(row) for row in rows]
-
+def get_questions(room_code):
+    if room_code not in rooms:
+        return []
+    return rooms[room_code]["questions"]
