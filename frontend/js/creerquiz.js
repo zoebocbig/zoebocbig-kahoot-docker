@@ -6,21 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizList = document.getElementById('quizList');
     const mainContent = document.getElementById('mainContent');
 
-    const quizzes = []; // Stocker tous les quiz
+    const quizzes = [];
+
+    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853']; // bleu, rouge, jaune, vert
+    const SYMBOLS = ['A', 'B', 'C', 'D'];
 
     addBtn.addEventListener('click', () => modal.style.display = 'block');
     closeModal.addEventListener('click', () => modal.style.display = 'none');
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-    });
+    window.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
 
     modalBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
-            const quiz = {
-                type: type,
-                questions: []
-            };
+            const quiz = { type, questions: [] };
             quizzes.push(quiz);
 
             const newQuiz = document.createElement('div');
@@ -37,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const editor = document.createElement('div');
                 editor.className = 'quiz-editor';
 
-                // Ajouter question
+                // Question
                 const questionInput = document.createElement('input');
                 questionInput.type = 'text';
                 questionInput.placeholder = 'Écris ta question ici...';
                 editor.appendChild(questionInput);
 
-                // Ajouter image
+                // Image
                 const imageInput = document.createElement('input');
                 imageInput.type = 'file';
                 imageInput.accept = 'image/*';
@@ -53,11 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 imagePreview.style.display = 'none';
                 editor.appendChild(imagePreview);
 
-                imageInput.addEventListener('change', (e) => {
+                imageInput.addEventListener('change', e => {
                     const file = e.target.files[0];
                     if(file){
                         const reader = new FileReader();
-                        reader.onload = function(ev){
+                        reader.onload = ev => {
                             imagePreview.src = ev.target.result;
                             imagePreview.style.display = 'block';
                         }
@@ -65,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // Ajouter réponses
+                // Réponses
                 const answersContainer = document.createElement('div');
                 answersContainer.className = 'answers';
                 editor.appendChild(answersContainer);
@@ -76,12 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 editor.appendChild(addAnswerBtn);
 
                 addAnswerBtn.addEventListener('click', () => {
+                    if(answersContainer.children.length >= 4) return; 
+
+                    const idx = answersContainer.children.length;
                     const answerDiv = document.createElement('div');
-                    answerDiv.style.display = 'flex';
-                    answerDiv.style.gap = '10px';
+                    answerDiv.className = 'answer-item';
+
                     const answerInput = document.createElement('input');
                     answerInput.type = 'text';
-                    answerInput.placeholder = 'Nouvelle réponse...';
+                    answerInput.placeholder = 'Réponse...';
 
                     const correctCheckbox = document.createElement('input');
                     correctCheckbox.type = 'checkbox';
@@ -90,77 +91,76 @@ document.addEventListener('DOMContentLoaded', () => {
                     answerDiv.appendChild(answerInput);
                     answerDiv.appendChild(correctCheckbox);
                     answersContainer.appendChild(answerDiv);
-                });
 
-                // Bouton lancer quiz
-                const launchQuizBtn = document.createElement('button');
-                launchQuizBtn.className = 'launch-quiz-btn';
-                launchQuizBtn.textContent = 'Lancer le quiz';
-                editor.appendChild(launchQuizBtn);
-
-                launchQuizBtn.addEventListener('click', () => {
-                    const questionText = questionInput.value;
-                    const imageSrc = imagePreview.src || null;
-                    const answers = [];
-
-                    answersContainer.querySelectorAll('div').forEach(div => {
-                        const text = div.querySelector('input[type="text"]').value;
-                        const correct = div.querySelector('input[type="checkbox"]').checked;
-                        if(text) answers.push({text, correct});
-                    });
-
-                    if(!questionText || answers.length === 0){
-                        alert('Question ou réponses manquantes !');
-                        return;
-                    }
-
-                    quiz.questions.push({question: questionText, image: imageSrc, answers});
-
-                    // Afficher le quiz interactif
-                    displayInteractiveQuiz({question: questionText, image: imageSrc, answers});
+                    renderInteractiveQuiz();
                 });
 
                 mainContent.appendChild(editor);
+
+                function renderInteractiveQuiz() {
+                    const questionText = questionInput.value || 'Question';
+                    const imageSrc = imagePreview.src || null;
+                    const answers = Array.from(answersContainer.children).map((div, i) => {
+                        return {
+                            text: div.querySelector('input[type="text"]').value || 'Réponse',
+                            correct: div.querySelector('input[type="checkbox"]').checked,
+                            color: COLORS[i],
+                            symbol: SYMBOLS[i]
+                        };
+                    });
+
+                    mainContent.innerHTML = '';
+
+                    const questionEl = document.createElement('div');
+                    questionEl.className = 'quiz-question';
+                    const h2 = document.createElement('h2');
+                    h2.textContent = questionText;
+                    questionEl.appendChild(h2);
+
+                    if(imageSrc){
+                        const img = document.createElement('img');
+                        img.src = imageSrc;
+                        img.style.maxWidth = '100%';
+                        questionEl.appendChild(img);
+                    }
+
+                    mainContent.appendChild(questionEl);
+
+                    answers.forEach(a => {
+                        const btn = document.createElement('button');
+                        btn.className = 'quiz-answer-btn';
+                        btn.style.backgroundColor = a.color;
+
+                        const symbolSpan = document.createElement('span');
+                        symbolSpan.className = 'symbol';
+                        symbolSpan.textContent = a.symbol;
+
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = a.text;
+
+                        btn.appendChild(symbolSpan);
+                        btn.appendChild(textSpan);
+
+                        btn.addEventListener('click', () => {
+                            if(a.correct){
+                                btn.classList.add('correct');
+                            } else {
+                                btn.classList.add('wrong');
+                            }
+                            mainContent.querySelectorAll('.quiz-answer-btn').forEach(b => b.disabled = true);
+                        });
+
+                        mainContent.appendChild(btn);
+                    });
+                }
+
+                // Mettre à jour le quiz interactif à chaque changement
+                questionInput.addEventListener('input', renderInteractiveQuiz);
+                imageInput.addEventListener('change', renderInteractiveQuiz);
+                answersContainer.addEventListener('input', renderInteractiveQuiz);
             });
 
             modal.style.display = 'none';
         });
     });
-
-    function displayInteractiveQuiz(q) {
-        mainContent.innerHTML = '';
-
-        const questionEl = document.createElement('div');
-        questionEl.className = 'quiz-question';
-        const h2 = document.createElement('h2');
-        h2.textContent = q.question;
-        questionEl.appendChild(h2);
-
-        if(q.image){
-            const img = document.createElement('img');
-            img.src = q.image;
-            img.style.maxWidth = '100%';
-            questionEl.appendChild(img);
-        }
-
-        mainContent.appendChild(questionEl);
-
-        q.answers.forEach(a => {
-            const btn = document.createElement('button');
-            btn.className = 'quiz-answer-btn';
-            btn.textContent = a.text;
-
-            btn.addEventListener('click', () => {
-                if(a.correct){
-                    btn.classList.add('correct');
-                } else {
-                    btn.classList.add('wrong');
-                }
-                // désactiver tous les boutons
-                mainContent.querySelectorAll('.quiz-answer-btn').forEach(b => b.disabled = true);
-            });
-
-            mainContent.appendChild(btn);
-        });
-    }
 });
