@@ -1,10 +1,11 @@
-/* Container & sidebar */
+/* Container principal */
 .container {
     display: flex;
     height: 100vh;
     font-family: 'Arial', sans-serif;
 }
 
+/* Sidebar gauche */
 .sidebar {
     width: 250px;
     background-color: #4b0082;
@@ -39,6 +40,7 @@
     border: 2px solid #ffeb3b;
 }
 
+/* Bouton Ajouter */
 #addBtn {
     background-color: #ff5733;
     color: #fff;
@@ -116,7 +118,7 @@
     margin-top: 5px;
 }
 
-/* Réponses */
+/* Container des réponses */
 .quiz-editor .answers {
     display: flex;
     flex-direction: column;
@@ -124,6 +126,7 @@
     margin-top: 10px;
 }
 
+/* Item de réponse */
 .quiz-editor .answer-item {
     display: flex;
     align-items: center;
@@ -150,11 +153,7 @@
     cursor: pointer;
 }
 
-/* Quiz interactif */
-.quiz-question {
-    margin-bottom: 20px;
-}
-
+/* Prévisualisation des réponses (boutons colorés) */
 .quiz-answer-btn {
     display: flex;
     align-items: center;
@@ -177,4 +176,15 @@
 .quiz-answer-btn .symbol {
     font-weight: bold;
     font-size: 18px;
+}
+
+/* Question + image */
+.quiz-question {
+    margin-bottom: 20px;
+}
+
+.quiz-question img {
+    max-width: 100%;
+    margin-top: 10px;
+    border-radius: 8px;
 }

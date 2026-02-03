@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizList = document.getElementById('quizList');
     const mainContent = document.getElementById('mainContent');
 
-    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853'];
-    const SYMBOLS = ['A', 'B', 'C', 'D'];
+    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853']; // couleurs réponses
+    const SYMBOLS = ['A', 'B', 'C', 'D']; // symboles réponses
 
     addBtn.addEventListener('click', () => modal.style.display = 'block');
     closeModal.addEventListener('click', () => modal.style.display = 'none');
@@ -58,22 +58,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // Réponses
+                // Container réponses
                 const answersContainer = document.createElement('div');
                 answersContainer.className = 'answers';
                 editor.appendChild(answersContainer);
 
+                // Bouton Ajouter Réponse
                 const addAnswerBtn = document.createElement('button');
-                addAnswerBtn.className = 'add-answer-btn';
                 addAnswerBtn.textContent = 'Ajouter une réponse';
                 editor.appendChild(addAnswerBtn);
 
                 addAnswerBtn.addEventListener('click', () => {
-                    if(answersContainer.children.length >= 4) return;
-
                     const idx = answersContainer.children.length;
+                    if(idx >= 4) return; // max 4 réponses
+
                     const answerDiv = document.createElement('div');
                     answerDiv.className = 'answer-item';
+                    answerDiv.style.backgroundColor = COLORS[idx];
+
+                    const symbolSpan = document.createElement('span');
+                    symbolSpan.textContent = SYMBOLS[idx];
+                    symbolSpan.style.fontWeight = 'bold';
+                    symbolSpan.style.fontSize = '18px';
+                    symbolSpan.style.color = '#fff';
 
                     const radio = document.createElement('input');
                     radio.type = 'radio';
@@ -82,75 +89,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const answerInput = document.createElement('input');
                     answerInput.type = 'text';
                     answerInput.placeholder = 'Réponse...';
+                    answerInput.style.color = '#fff';
+                    answerInput.style.background = 'transparent';
+                    answerInput.style.border = 'none';
+                    answerInput.style.flex = '1';
 
+                    answerDiv.appendChild(symbolSpan);
                     answerDiv.appendChild(radio);
                     answerDiv.appendChild(answerInput);
-                    answersContainer.appendChild(answerDiv);
 
-                    renderInteractiveQuiz();
+                    answersContainer.appendChild(answerDiv);
                 });
 
                 mainContent.appendChild(editor);
-
-                function renderInteractiveQuiz() {
-                    const questionText = questionInput.value || 'Question';
-                    const imageSrc = imagePreview.src || null;
-
-                    const answers = Array.from(answersContainer.children).map((div, i) => ({
-                        text: div.querySelector('input[type="text"]').value || 'Réponse',
-                        correct: div.querySelector('input[type="radio"]').checked,
-                        color: COLORS[i],
-                        symbol: SYMBOLS[i]
-                    }));
-
-                    mainContent.innerHTML = '';
-
-                    const questionEl = document.createElement('div');
-                    questionEl.className = 'quiz-question';
-                    const h2 = document.createElement('h2');
-                    h2.textContent = questionText;
-                    questionEl.appendChild(h2);
-
-                    if(imageSrc){
-                        const img = document.createElement('img');
-                        img.src = imageSrc;
-                        img.style.maxWidth = '100%';
-                        questionEl.appendChild(img);
-                    }
-
-                    mainContent.appendChild(questionEl);
-
-                    answers.forEach(a => {
-                        const btn = document.createElement('button');
-                        btn.className = 'quiz-answer-btn';
-                        btn.style.backgroundColor = a.color;
-
-                        const symbolSpan = document.createElement('span');
-                        symbolSpan.className = 'symbol';
-                        symbolSpan.textContent = a.symbol;
-
-                        const textSpan = document.createElement('span');
-                        textSpan.textContent = a.text;
-
-                        btn.appendChild(symbolSpan);
-                        btn.appendChild(textSpan);
-
-                        btn.addEventListener('click', () => {
-                            if(a.correct){
-                                btn.classList.add('correct');
-                            } else {
-                                btn.classList.add('wrong');
-                            }
-                            mainContent.querySelectorAll('.quiz-answer-btn').forEach(b => b.disabled = true);
-                        });
-
-                        mainContent.appendChild(btn);
-                    });
-                }
-
-                questionInput.addEventListener('input', renderInteractiveQuiz);
-                imageInput.addEventListener('change', renderInteractiveQuiz);
-                answersContainer.addEventListener('input', renderInteractiveQuiz);
             });
 
             modal.style.display = 'none';
