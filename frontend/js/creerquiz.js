@@ -108,3 +108,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Fonction pour récupérer les données du quiz depuis le DOM
+function collectQuizData() {
+    const title = prompt("Nom du quiz :"); // ou tu peux mettre un input
+    const type = "quiz"; // ou "vrai-faux"
+
+    const editor = document.querySelector('.quiz-editor');
+    if (!editor) return null;
+
+    const questionInput = editor.querySelector('input[type="text"]');
+    const image = editor.querySelector('img');
+    const answersDivs = editor.querySelectorAll('.answer-item');
+
+    const questions = [{
+        text: questionInput.value,
+        image_path: image && image.src ? image.src : null,
+        answers: Array.from(answersDivs).map(div => {
+            return {
+                text: div.querySelector('input[type="text"]').value,
+                is_correct: div.querySelector('input[type="radio"]').checked,
+                color: div.style.backgroundColor,
+                symbol: div.querySelector('span').textContent
+            };
+        })
+    }];
+
+    return { title, type, questions };
+}
+
+// Fonction pour envoyer le quiz au backend
+function saveQuiz() {
+    const quizData = collectQuizData();
+    if (!quizData) return alert("Aucun quiz à sauvegarder !");
+
+    fetch("http://localhost:3000/api/save-quiz", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": "TA_CLE_API_ICI" // même clé que ton server.js
+        },
+        body: JSON.stringify(quizData)
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message))
+    .catch(err => console.error(err));
+}
+
+// Ajouter le bouton dans le DOM
+const saveBtn = document.createElement("button");
+saveBtn.textContent = "Enregistrer le quiz";
+saveBtn.style.marginTop = "10px";
+saveBtn.addEventListener("click", saveQuiz);
+
+document.body.appendChild(saveBtn);

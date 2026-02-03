@@ -71,6 +71,35 @@ app.post("/api/create-room-from-doc", (req, res) => {
 });
 
 // -----------------------------
+// ROUTE : enregistrer un quiz
+// -----------------------------
+app.post("/api/save-quiz", (req, res) => {
+    const apiKey = req.headers["x-api-key"];
+
+    if (apiKey !== API_KEY) {
+        return res.status(403).json({ message: "Clé API invalide" });
+    }
+
+    const { title, type, questions } = req.body;
+
+    if (!title || !type || !questions || !Array.isArray(questions)) {
+        return res.status(400).json({ message: "Données du quiz invalides" });
+    }
+
+    // Pour l'instant, on va juste afficher dans la console
+    console.log("Quiz à sauvegarder :");
+    console.log("Titre:", title);
+    console.log("Type:", type);
+    console.log("Questions:", questions);
+
+    // TODO : ici tu pourrais sauvegarder dans une vraie DB
+    // Par exemple MongoDB, SQLite, ou un fichier JSON
+
+    res.json({ message: "Quiz reçu avec succès !" });
+});
+
+
+// -----------------------------
 // Démarrage du serveur
 // -----------------------------
 const PORT = 3000;
