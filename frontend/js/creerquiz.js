@@ -6,8 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizList = document.getElementById('quizList');
     const mainContent = document.getElementById('mainContent');
 
-    const quizzes = [];
-    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853']; // bleu, rouge, jaune, vert
+    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853'];
     const SYMBOLS = ['A', 'B', 'C', 'D'];
 
     addBtn.addEventListener('click', () => modal.style.display = 'block');
@@ -17,8 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modalBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
-            const quiz = { type, questions: [] };
-            quizzes.push(quiz);
 
             const newQuiz = document.createElement('div');
             newQuiz.className = 'quiz-item';
@@ -30,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 newQuiz.classList.add('active');
 
                 mainContent.innerHTML = '';
-
                 const editor = document.createElement('div');
                 editor.className = 'quiz-editor';
 
@@ -74,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 addAnswerBtn.addEventListener('click', () => {
                     if(answersContainer.children.length >= 4) return;
+
                     const idx = answersContainer.children.length;
                     const answerDiv = document.createElement('div');
                     answerDiv.className = 'answer-item';

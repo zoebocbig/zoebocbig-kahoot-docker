@@ -1,4 +1,4 @@
-/* Sidebar et container inchangés */
+/* Container & sidebar */
 .container {
     display: flex;
     height: 100vh;
@@ -39,7 +39,6 @@
     border: 2px solid #ffeb3b;
 }
 
-/* Bouton Ajouter */
 #addBtn {
     background-color: #ff5733;
     color: #fff;
@@ -113,11 +112,16 @@
     border: 1px solid #ccc;
 }
 
+.quiz-editor input[type="file"] {
+    margin-top: 5px;
+}
+
 /* Réponses */
 .quiz-editor .answers {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-top: 10px;
 }
 
 .quiz-editor .answer-item {
