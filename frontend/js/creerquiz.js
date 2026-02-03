@@ -6,8 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizList = document.getElementById('quizList');
     const mainContent = document.getElementById('mainContent');
 
-    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853']; // couleurs réponses
-    const SYMBOLS = ['A', 'B', 'C', 'D']; // symboles réponses
+    const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853'];
+    const SYMBOLS = ['A', 'B', 'C', 'D'];
+
+    const quizzes = []; // stocke toutes les slides
+    let currentQuizIndex = null;
 
     addBtn.addEventListener('click', () => modal.style.display = 'block');
     closeModal.addEventListener('click', () => modal.style.display = 'none');
@@ -16,149 +19,151 @@ document.addEventListener('DOMContentLoaded', () => {
     modalBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
+            const quiz = { type, questions: [{ text: "", image: null, answers: [] }] };
+            quizzes.push(quiz);
+            const quizIndex = quizzes.length - 1;
 
             const newQuiz = document.createElement('div');
-            newQuiz.className = 'quiz-item';
-            newQuiz.textContent = type === 'quiz' ? 'Nouveau Quiz' : 'Nouveau Vrai ou Faux';
-            quizList.appendChild(newQuiz);
+        newQuiz.className = 'quiz-item';
+        newQuiz.textContent = type === 'quiz' ? 'Nouveau Quiz' : 'Nouveau Vrai ou Faux';
 
-            newQuiz.addEventListener('click', () => {
-                document.querySelectorAll('.quiz-item').forEach(q => q.classList.remove('active'));
-                newQuiz.classList.add('active');
+        // Création du bouton supprimer
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '×'; // petit X
+        deleteBtn.style.marginLeft = '10px';
+        deleteBtn.style.background = 'transparent';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.color = '#fff';
+        deleteBtn.style.cursor = 'pointer';
+        deleteBtn.style.fontWeight = 'bold';
+        deleteBtn.style.fontSize = '16px';
 
-                mainContent.innerHTML = '';
-                const editor = document.createElement('div');
-                editor.className = 'quiz-editor';
+        // Action du bouton supprimer
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // empêche le clic de sélectionner la slide
+            quizzes.splice(quizIndex, 1); // supprime du tableau
+            quizList.removeChild(newQuiz); // supprime de la sidebar
 
-                // Question
-                const questionInput = document.createElement('input');
-                questionInput.type = 'text';
-                questionInput.placeholder = 'Écris ta question ici...';
-                editor.appendChild(questionInput);
-
-                // Image
-                const imageInput = document.createElement('input');
-                imageInput.type = 'file';
-                imageInput.accept = 'image/*';
-                editor.appendChild(imageInput);
-
-                const imagePreview = document.createElement('img');
-                imagePreview.style.display = 'none';
-                editor.appendChild(imagePreview);
-
-                imageInput.addEventListener('change', e => {
-                    const file = e.target.files[0];
-                    if(file){
-                        const reader = new FileReader();
-                        reader.onload = ev => {
-                            imagePreview.src = ev.target.result;
-                            imagePreview.style.display = 'block';
-                        }
-                        reader.readAsDataURL(file);
-                    }
-                });
-
-                // Container réponses
-                const answersContainer = document.createElement('div');
-                answersContainer.className = 'answers';
-                editor.appendChild(answersContainer);
-
-                // Bouton Ajouter Réponse
-                const addAnswerBtn = document.createElement('button');
-                addAnswerBtn.textContent = 'Ajouter une réponse';
-                editor.appendChild(addAnswerBtn);
-
-                addAnswerBtn.addEventListener('click', () => {
-                    const idx = answersContainer.children.length;
-                    if(idx >= 4) return; // max 4 réponses
-
-                    const answerDiv = document.createElement('div');
-                    answerDiv.className = 'answer-item';
-                    answerDiv.style.backgroundColor = COLORS[idx];
-
-                    const symbolSpan = document.createElement('span');
-                    symbolSpan.textContent = SYMBOLS[idx];
-                    symbolSpan.style.fontWeight = 'bold';
-                    symbolSpan.style.fontSize = '18px';
-                    symbolSpan.style.color = '#fff';
-
-                    const radio = document.createElement('input');
-                    radio.type = 'radio';
-                    radio.name = 'correctAnswer';
-
-                    const answerInput = document.createElement('input');
-                    answerInput.type = 'text';
-                    answerInput.placeholder = 'Réponse...';
-                    answerInput.style.color = '#fff';
-                    answerInput.style.background = 'transparent';
-                    answerInput.style.border = 'none';
-                    answerInput.style.flex = '1';
-
-                    answerDiv.appendChild(symbolSpan);
-                    answerDiv.appendChild(radio);
-                    answerDiv.appendChild(answerInput);
-
-                    answersContainer.appendChild(answerDiv);
-                });
-
-                mainContent.appendChild(editor);
-            });
-
-            modal.style.display = 'none';
-        });
+        // Si la slide affichée était celle supprimée
+        if(currentQuizIndex === quizIndex) {
+            mainContent.innerHTML = '<h1>Créer ton quiz</h1><p>Selectionne un quiz dans la colonne de gauche pour le modifier.</p>';
+            currentQuizIndex = null;
+        }
     });
+
+    // Ajouter le bouton à la slide
+    newQuiz.appendChild(deleteBtn);
+
+    // Ajouter la diapo à la sidebar
+    quizList.appendChild(newQuiz);
+
+
+                newQuiz.addEventListener('click', () => showQuiz(quizIndex));
+
+                modal.style.display = 'none';
+            });
+        });
+
+    function showQuiz(quizIndex) {
+        currentQuizIndex = quizIndex;
+        document.querySelectorAll('.quiz-item').forEach(q => q.classList.remove('active'));
+        quizList.children[quizIndex].classList.add('active');
+
+        mainContent.innerHTML = '';
+        const editor = document.createElement('div');
+        editor.className = 'quiz-editor';
+
+        const quiz = quizzes[quizIndex];
+        const question = quiz.questions[0]; // ici on prend la première question
+
+        // Question
+        const questionInput = document.createElement('input');
+        questionInput.type = 'text';
+        questionInput.placeholder = 'Écris ta question ici...';
+        questionInput.value = question.text;
+        questionInput.addEventListener('input', () => question.text = questionInput.value);
+        editor.appendChild(questionInput);
+
+        // Image
+        const imageInput = document.createElement('input');
+        imageInput.type = 'file';
+        imageInput.accept = 'image/*';
+        editor.appendChild(imageInput);
+
+        const imagePreview = document.createElement('img');
+        if(question.image){
+            imagePreview.src = question.image;
+            imagePreview.style.display = 'block';
+        } else {
+            imagePreview.style.display = 'none';
+        }
+        editor.appendChild(imagePreview);
+
+        imageInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if(file){
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    imagePreview.src = ev.target.result;
+                    imagePreview.style.display = 'block';
+                    question.image = ev.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Réponses
+        const answersContainer = document.createElement('div');
+        answersContainer.className = 'answers';
+        editor.appendChild(answersContainer);
+
+        function renderAnswers() {
+            answersContainer.innerHTML = '';
+            question.answers.forEach((a, idx) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-item';
+                answerDiv.style.backgroundColor = a.color;
+
+                const symbolSpan = document.createElement('span');
+                symbolSpan.textContent = a.symbol;
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'correctAnswer';
+                radio.checked = a.is_correct;
+                radio.addEventListener('change', () => {
+                    question.answers.forEach((ans, i) => ans.is_correct = i === idx);
+                });
+
+                const answerInput = document.createElement('input');
+                answerInput.type = 'text';
+                answerInput.value = a.text;
+                answerInput.addEventListener('input', () => a.text = answerInput.value);
+
+                answerDiv.appendChild(symbolSpan);
+                answerDiv.appendChild(radio);
+                answerDiv.appendChild(answerInput);
+                answersContainer.appendChild(answerDiv);
+            });
+        }
+
+        renderAnswers();
+
+        const addAnswerBtn = document.createElement('button');
+        addAnswerBtn.textContent = 'Ajouter une réponse';
+        addAnswerBtn.addEventListener('click', () => {
+            if(question.answers.length >= 4) return;
+            const idx = question.answers.length;
+            question.answers.push({
+                text: '',
+                is_correct: false,
+                color: COLORS[idx],
+                symbol: SYMBOLS[idx]
+            });
+            renderAnswers();
+        });
+        editor.appendChild(addAnswerBtn);
+
+        mainContent.appendChild(editor);
+    }
 });
-
-// Fonction pour récupérer les données du quiz depuis le DOM
-function collectQuizData() {
-    const title = prompt("Nom du quiz :"); // ou tu peux mettre un input
-    const type = "quiz"; // ou "vrai-faux"
-
-    const editor = document.querySelector('.quiz-editor');
-    if (!editor) return null;
-
-    const questionInput = editor.querySelector('input[type="text"]');
-    const image = editor.querySelector('img');
-    const answersDivs = editor.querySelectorAll('.answer-item');
-
-    const questions = [{
-        text: questionInput.value,
-        image_path: image && image.src ? image.src : null,
-        answers: Array.from(answersDivs).map(div => {
-            return {
-                text: div.querySelector('input[type="text"]').value,
-                is_correct: div.querySelector('input[type="radio"]').checked,
-                color: div.style.backgroundColor,
-                symbol: div.querySelector('span').textContent
-            };
-        })
-    }];
-
-    return { title, type, questions };
-}
-
-// Fonction pour envoyer le quiz au backend
-function saveQuiz() {
-    const quizData = collectQuizData();
-    if (!quizData) return alert("Aucun quiz à sauvegarder !");
-
-    fetch("http://localhost:3000/api/save-quiz", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-api-key": "TA_CLE_API_ICI" // même clé que ton server.js
-        },
-        body: JSON.stringify(quizData)
-    })
-    .then(res => res.json())
-    .then(data => alert(data.message))
-    .catch(err => console.error(err));
-}
-
-// Ajouter le bouton dans le DOM
-const saveBtn = document.createElement("button");
-saveBtn.textContent = "Enregistrer le quiz";
-saveBtn.style.marginTop = "10px";
-saveBtn.addEventListener("click", saveQuiz);
-
-document.body.appendChild(saveBtn);
