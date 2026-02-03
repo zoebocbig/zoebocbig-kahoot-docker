@@ -2,36 +2,32 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>🎮 Kahoot Clone</title>
+    <title>Kahoot Clone</title>
     <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>🎉 Bienvenue sur Kahoot Clone</h1>
+<header class="top-bar">
+    <div class="logo">Kahoot<span>!</span></div>
+</header>
 
-    <!-- Créer un quiz -->
+<main class="main">
     <div class="card">
-        <h2>Créer un Quiz</h2>
-        <form id="createForm">
-            <input type="text" id="roomName" placeholder="Nom du quiz" required>
-            <input type="text" id="roomCode" placeholder="Code du quiz" required>
-            <button type="submit">Créer</button>
-        </form>
-    </div>
+        <h1>Kahoot<span>!</span></h1>
 
-    <!-- Rejoindre un quiz -->
-    <div class="card">
-        <h2>Rejoindre un Quiz</h2>
         <form id="joinForm">
-            <input type="text" id="username" placeholder="Pseudo" required>
-            <input type="text" id="joinCode" placeholder="Code du quiz" required>
-            <button type="submit">Rejoindre</button>
+            <input 
+                type="text" 
+                id="roomCode" 
+                placeholder="Code PIN du jeu"
+                required
+            >
+            <button type="submit">Valider</button>
         </form>
-    </div>
 
-    <p id="message"></p>
-</div>
+        <p id="message"></p>
+    </div>
+</main>
 
 <script src="js/home.js"></script>
 </body>
