@@ -1,10 +1,10 @@
-/* Container principal */
+/* Sidebar et container inchangés */
 .container {
     display: flex;
     height: 100vh;
+    font-family: 'Arial', sans-serif;
 }
 
-/* Colonne gauche */
 .sidebar {
     width: 250px;
     background-color: #4b0082;
@@ -28,6 +28,15 @@
     margin-bottom: 10px;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#quizList .quiz-item:hover {
+    background-color: #7c1edd;
+}
+
+#quizList .quiz-item.active {
+    border: 2px solid #ffeb3b;
 }
 
 /* Bouton Ajouter */
@@ -45,13 +54,14 @@
 .main-content {
     flex: 1;
     padding: 30px;
-    background-color: #e0e0e0;
+    background-color: #f5f5f5;
     color: #000;
+    overflow-y: auto;
 }
 
 /* Modal */
 .modal {
-    display: none; /* caché par défaut */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -85,11 +95,25 @@
     cursor: pointer;
 }
 
-#quizList .quiz-item.active {
-    border: 2px solid #ffeb3b;
-    background-color: #9b30ff;
+.modal-btn[data-type="quiz"] { background-color: #33c1ff; color: #fff; }
+.modal-btn[data-type="vrai-faux"] { background-color: #ff5733; color: #fff; }
+
+/* Éditeur de quiz */
+.quiz-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
+.quiz-editor input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Réponses */
 .quiz-editor .answers {
     display: flex;
     flex-direction: column;
@@ -100,13 +124,31 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    background-color: #e0e0e0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.quiz-editor .answer-item:hover {
+    background-color: #d0d0d0;
 }
 
 .quiz-editor .answer-item input[type="text"] {
     flex: 1;
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+}
+
+.quiz-editor .answer-item input[type="radio"] {
+    transform: scale(1.5);
+    cursor: pointer;
+}
+
+/* Quiz interactif */
+.quiz-question {
+    margin-bottom: 20px;
 }
 
 .quiz-answer-btn {
@@ -132,7 +174,3 @@
     font-weight: bold;
     font-size: 18px;
 }
-
-
-.modal-btn[data-type="quiz"] { background-color: #33c1ff; color: #fff; }
-.modal-btn[data-type="vrai-faux"] { background-color: #ff5733; color: #fff; }

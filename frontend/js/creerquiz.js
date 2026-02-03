@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = document.getElementById('mainContent');
 
     const quizzes = [];
-
     const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853']; // bleu, rouge, jaune, vert
     const SYMBOLS = ['A', 'B', 'C', 'D'];
 
@@ -74,22 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 editor.appendChild(addAnswerBtn);
 
                 addAnswerBtn.addEventListener('click', () => {
-                    if(answersContainer.children.length >= 4) return; 
-
+                    if(answersContainer.children.length >= 4) return;
                     const idx = answersContainer.children.length;
                     const answerDiv = document.createElement('div');
                     answerDiv.className = 'answer-item';
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'correctAnswer';
 
                     const answerInput = document.createElement('input');
                     answerInput.type = 'text';
                     answerInput.placeholder = 'Réponse...';
 
-                    const correctCheckbox = document.createElement('input');
-                    correctCheckbox.type = 'checkbox';
-                    correctCheckbox.title = 'Bonne réponse';
-
+                    answerDiv.appendChild(radio);
                     answerDiv.appendChild(answerInput);
-                    answerDiv.appendChild(correctCheckbox);
                     answersContainer.appendChild(answerDiv);
 
                     renderInteractiveQuiz();
@@ -100,14 +98,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 function renderInteractiveQuiz() {
                     const questionText = questionInput.value || 'Question';
                     const imageSrc = imagePreview.src || null;
-                    const answers = Array.from(answersContainer.children).map((div, i) => {
-                        return {
-                            text: div.querySelector('input[type="text"]').value || 'Réponse',
-                            correct: div.querySelector('input[type="checkbox"]').checked,
-                            color: COLORS[i],
-                            symbol: SYMBOLS[i]
-                        };
-                    });
+
+                    const answers = Array.from(answersContainer.children).map((div, i) => ({
+                        text: div.querySelector('input[type="text"]').value || 'Réponse',
+                        correct: div.querySelector('input[type="radio"]').checked,
+                        color: COLORS[i],
+                        symbol: SYMBOLS[i]
+                    }));
 
                     mainContent.innerHTML = '';
 
@@ -154,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                // Mettre à jour le quiz interactif à chaque changement
                 questionInput.addEventListener('input', renderInteractiveQuiz);
                 imageInput.addEventListener('change', renderInteractiveQuiz);
                 answersContainer.addEventListener('input', renderInteractiveQuiz);
