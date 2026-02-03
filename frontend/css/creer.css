@@ -11,21 +11,6 @@ body {
     color: white;
 }
 
-.top-bar {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    padding-left: 20px;
-}
-
-.logo {
-    font-size: 26px;
-    font-weight: bold;
-}
-
-.logo span {
-    color: #ffcc00;
-}
 
 .main {
     height: calc(100vh - 60px);
@@ -45,31 +30,22 @@ body {
 }
 
 .container h1 {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-.container input {
+button {
     width: 100%;
-    padding: 14px;
-    margin-bottom: 15px;
-    border-radius: 6px;
-    border: 2px solid #ddd;
-    text-align: center;
-    font-size: 16px;
-}
-
-.container button {
-    width: 100%;
-    padding: 14px;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: bold;
     background: #e21b3c;
     color: white;
-    font-size: 18px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
 }
 
-.container button:hover {
+button:hover {
     opacity: 0.9;
 }
 

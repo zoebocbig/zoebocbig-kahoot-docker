@@ -1,23 +1,16 @@
-const form = document.getElementById("createForm");
+const button = document.getElementById("createBtn");
 const message = document.getElementById("message");
 
 const API_URL = "http://backend:5000/api";
 const API_KEY = "TA_CLE_API_ICI";
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const roomName = document.getElementById("roomName").value;
-    const roomCode = document.getElementById("roomCode").value;
-
+button.addEventListener("click", async () => {
     try {
-        const res = await fetch(`${API_URL}/create-room`, {
+        const res = await fetch(`${API_URL}/create-room-from-doc`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 "x-api-key": API_KEY
-            },
-            body: JSON.stringify({ roomName, roomCode })
+            }
         });
 
         const data = await res.json();
@@ -29,16 +22,31 @@ form.addEventListener("submit", async (e) => {
         }
 
         message.style.color = "green";
-        message.textContent = "Quiz créé avec succès 🎉";
+        message.textContent = `Quiz créé ! Code : ${data.roomCode}`;
 
-        // Redirection vers le home après création
-        setTimeout(() => {
-            window.location.href = "/home.html";
-        }, 1500);
 
     } catch (err) {
         message.style.color = "red";
         message.textContent = "Serveur indisponible";
         console.error(err);
     }
+});
+
+document.getElementById("creerDoc").addEventListener("click", async () => {
+    const response = await fetch("http://localhost:3000/api/create-room-from-doc", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": "TA_CLE_API_ICI"
+        },
+        body: JSON.stringify({
+            questions: [
+                { question: "Capitale de la France ?", answer: "Paris" },
+                { question: "2 + 2 ?", answer: "4" }
+            ]
+        })
+    });
+
+    const data = await response.json();
+    alert("Code du quiz : " + data.roomCode);
 });
