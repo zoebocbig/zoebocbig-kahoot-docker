@@ -234,7 +234,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.checked = a.correct;
                 checkbox.addEventListener('change', () => {
                     console.log('Checkbox', idx, 'changed to', checkbox.checked);
-                    a.correct = checkbox.checked;
+
+                    if (q.type === 'vrai-faux') {
+                        // Vrai/Faux => mono-sélection
+                        if (checkbox.checked) {
+                            q.answers.forEach((ans, j) => ans.correct = (j === idx));
+                        } else {
+                            q.answers[idx].correct = false;
+                        }
+                    } else {
+                        // Quiz normal => respecter q.answerLimit
+                        if (checkbox.checked) {
+                            const checkedCount = q.answers.filter(x => x.correct).length;
+                            if (checkedCount > q.answerLimit) {
+                                // Revert: cannot check more than limit
+                                checkbox.checked = false;
+                                q.answers[idx].correct = false;
+                                return;
+                            }
+                            q.answers[idx].correct = true;
+                        } else {
+                            q.answers[idx].correct = false;
+                        }
+                    }
+
                     updateCheckboxes();
                 });
 
@@ -275,28 +298,25 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateCheckboxes() {
             console.log('updateCheckboxes: limit =', q.answerLimit);
 
-            // Count checked answers
-            const checkedCount = q.answers.filter(a => a.correct).length;
-            
-            // Mettre à jour la limite en fonction du nombre de cases cochées
-            if (checkedCount > 0) {
-                q.answerLimit = checkedCount;
-                limitInput.value = checkedCount;
-                console.log('Updated answerLimit to:', checkedCount);
-            }
-
+            // Ensure answerLimit is valid
             if (!q.answerLimit || isNaN(q.answerLimit)) {
                 q.answerLimit = 1;
             }
+            // Clamp between 1 and max answers
+            q.answerLimit = Math.max(1, Math.min(q.answers.length, q.answerLimit));
 
-            // Force limit to be between 1 and 4
-            q.answerLimit = Math.max(1, Math.min(4, q.answerLimit));
-
+            const checkedCount = q.answers.filter(a => a.correct).length;
             const checkboxes = answersDiv.querySelectorAll('input[type=checkbox]');
 
             checkboxes.forEach((cb, idx) => {
                 cb.checked = !!q.answers[idx].correct;
-                console.log('Checkbox', idx, '- checked:', cb.checked);
+                // For vrai-faux enforce single selection; for quiz, disable extras when at limit
+                if (q.type === 'vrai-faux') {
+                    // If one is checked, other is disabled
+                    cb.disabled = !cb.checked && checkedCount >= 1;
+                } else {
+                    cb.disabled = !cb.checked && checkedCount >= q.answerLimit;
+                }
             });
         }
 
