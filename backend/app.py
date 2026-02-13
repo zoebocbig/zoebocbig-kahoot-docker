@@ -2,10 +2,10 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from database import init_db, create_room, join_room, add_question, get_questions
 
-app = Flask(__name__, static_folder="frontend/dist", static_url_path="")
-CORS(app)  # autoriser le frontend
+app = Flask(__name__, static_folder="frontend", static_url_path="")
+CORS(app)
 
-# Initialiser "base"
+# Initialiser la base
 init_db()
 
 API_KEY = "TA_CLE_API_ICI"
@@ -31,7 +31,6 @@ def api_create_room():
 
     return jsonify({"message": f"Room {room_name} créée !"})
 
-
 @app.route("/api/join-quiz", methods=["POST"])
 def api_join_quiz():
     data = request.get_json()
@@ -48,7 +47,6 @@ def api_join_quiz():
         return jsonify({"message": "Room inexistante"}), 404
 
     return jsonify({"message": f"{username} a rejoint le quiz {room_code}"})
-
 
 @app.route("/api/add-question", methods=["POST"])
 def api_add_question():
@@ -69,11 +67,9 @@ def api_add_question():
 
     return jsonify({"message": "Question ajoutée"})
 
-
 @app.route("/api/questions/<room_code>")
 def api_get_questions(room_code):
     return jsonify(get_questions(room_code))
-
 
 # -------------------
 # Routes Frontend
@@ -82,9 +78,16 @@ def api_get_questions(room_code):
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
-    return send_from_directory(app.static_folder, "index.html")
-
+    # Sert les fichiers statiques (html, css, js)
+    if path != "" and path != "favicon.ico":
+        try:
+            return send_from_directory(app.static_folder, path)
+        except:
+            pass
+    return send_from_directory(app.static_folder, "creerquiz.html")
 
 # -------------------
 # Lancer le serveur
-# ----
+# -------------------
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

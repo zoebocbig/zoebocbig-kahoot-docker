@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Checkbox Limit</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .answer-item { padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+        input[type=checkbox]:disabled { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <h1>Test Limite de Réponses</h1>
+    
+    <label>
+        Limite de réponses:
+        <input type="number" id="limitInput" min="1" max="4" value="1">
+    </label>
+
+    <div id="answersDiv"></div>
+
+    <button id="testBtn">Générer 4 réponses</button>
+
+    <script>
+        const answers = [];
+        const COLORS = ['#00bfff', '#ff4c4c', '#ffcc00', '#00c853'];
+        const SYMBOLS = ['A', 'B', 'C', 'D'];
+        let answerLimit = 1;
+
+        const answersDiv = document.getElementById('answersDiv');
+        const limitInput = document.getElementById('limitInput');
+        const testBtn = document.getElementById('testBtn');
+
+        // Initialiser les réponses
+        for (let i = 0; i < 4; i++) {
+            answers.push({
+                text: `Réponse ${SYMBOLS[i]}`,
+                correct: false,
+                color: COLORS[i],
+                symbol: SYMBOLS[i]
+            });
+        }
+
+        // Afficher les réponses
+        function renderAnswers() {
+            answersDiv.innerHTML = '';
+            answers.forEach((a, idx) => {
+                const d = document.createElement('div');
+                d.className = 'answer-item';
+                d.style.background = a.color;
+
+                const s = document.createElement('span');
+                s.textContent = a.symbol;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = a.correct;
+                checkbox.addEventListener('change', () => {
+                    console.log(`Checkbox ${idx} changed to ${checkbox.checked}`);
+                    a.correct = checkbox.checked;
+                    updateCheckboxes();
+                });
+
+                const t = document.createElement('input');
+                t.type = 'text';
+                t.value = a.text;
+                t.placeholder = 'Réponse...';
+
+                d.appendChild(s);
+                d.appendChild(checkbox);
+                d.appendChild(t);
+                answersDiv.appendChild(d);
+            });
+            updateCheckboxes();
+        }
+
+        function updateCheckboxes() {
+            console.log('updateCheckboxes: answerLimit =', answerLimit);
+            
+            if (!answerLimit || isNaN(answerLimit)) answerLimit = 1;
+
+            const checkedIndexes = [];
+            answers.forEach((a, idx) => {
+                if (a.correct) checkedIndexes.push(idx);
+            });
+
+            console.log('Checked indexes:', checkedIndexes);
+
+            if (checkedIndexes.length > answerLimit) {
+                const toUncheck = checkedIndexes.length - answerLimit;
+                console.log(`Unchecking ${toUncheck} answers`);
+                for (let i = 0; i < toUncheck; i++) {
+                    const idx = checkedIndexes.pop();
+                    answers[idx].correct = false;
+                }
+            }
+
+            const checkedCount = answers.filter(a => a.correct).length;
+            console.log('Checked count:', checkedCount, 'Limit:', answerLimit);
+
+            const checkboxes = answersDiv.querySelectorAll('input[type=checkbox]');
+            checkboxes.forEach((cb, idx) => {
+                cb.checked = !!answers[idx].correct;
+                const shouldDisable = !cb.checked && checkedCount >= answerLimit;
+                cb.disabled = shouldDisable;
+                console.log(`Checkbox ${idx}: checked=${cb.checked}, disabled=${cb.disabled}`);
+            });
+        }
+
+        limitInput.addEventListener('input', () => {
+            let v = parseInt(limitInput.value);
+            if (isNaN(v)) v = 1;
+            v = Math.max(1, Math.min(4, v));
+            limitInput.value = v;
+            answerLimit = v;
+            console.log('Limit changed to:', v);
+            updateCheckboxes();
+        });
+
+        testBtn.onclick = () => {
+            console.log('Creating 4 answers');
+            renderAnswers();
+        };
+
+        // Génération automatique au chargement
+        window.addEventListener('load', () => {
+            console.log('Page loaded, creating answers');
+            renderAnswers();
+        });
+    </script>
+</body>
+</html>
