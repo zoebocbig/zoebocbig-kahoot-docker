@@ -55,9 +55,39 @@ body {
     margin-bottom: 15px;
 }
 
-/* IMAGE UPLOAD */
+/* QUIZ EDITOR */
+.quiz-editor input[type=text] {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+}
+
 .quiz-editor input[type=file] {
     margin-bottom: 20px;
+}
+
+/* QUIZ PARAMS */
+.quiz-params {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.quiz-params label {
+    font-weight: bold;
+    color: #333;
+}
+
+.quiz-params input[type=number] {
+    padding: 8px;
+    border: 2px solid #00bfff;
+    border-radius: 5px;
+    font-size: 14px;
 }
 
 /* ANSWERS */
@@ -66,6 +96,7 @@ body {
     grid-template-columns: repeat(2,1fr);
     gap: 15px;
     margin-top: 15px;
+    margin-bottom: 20px;
 }
 
 .answer-item {
