@@ -42,21 +42,40 @@ document.addEventListener('DOMContentLoaded', () => {
     modalBtns.forEach((btn, btnIdx) => {
         btn.onclick = (e) => {
             e.preventDefault();
-            console.log('Modal button clicked:', btn.dataset.type);
+            const quizType = btn.dataset.type;
+            console.log('Modal button clicked:', quizType);
             
-            const quiz = {
-                question: "",
-                image: null,
-                answers: [
-                    { text: "", correct: false, color: COLORS[0], symbol: SYMBOLS[0] },
-                    { text: "", correct: false, color: COLORS[1], symbol: SYMBOLS[1] },
-                    { text: "", correct: false, color: COLORS[2], symbol: SYMBOLS[2] },
-                    { text: "", correct: false, color: COLORS[3], symbol: SYMBOLS[3] }
-                ],
-                answerLimit: 1,
-                timeLimit: 30,
-                points: 1000
-            };
+            let quiz;
+            
+            if (quizType === 'vrai-faux') {
+                quiz = {
+                    type: 'vrai-faux',
+                    question: "",
+                    image: null,
+                    answers: [
+                        { text: "Vrai", correct: false, color: '#00c853', symbol: '✓' },
+                        { text: "Faux", correct: false, color: '#ff4c4c', symbol: '✕' }
+                    ],
+                    answerLimit: 1,
+                    timeLimit: 30,
+                    points: 1000
+                };
+            } else {
+                quiz = {
+                    type: 'quiz',
+                    question: "",
+                    image: null,
+                    answers: [
+                        { text: "", correct: false, color: COLORS[0], symbol: SYMBOLS[0] },
+                        { text: "", correct: false, color: COLORS[1], symbol: SYMBOLS[1] },
+                        { text: "", correct: false, color: COLORS[2], symbol: SYMBOLS[2] },
+                        { text: "", correct: false, color: COLORS[3], symbol: SYMBOLS[3] }
+                    ],
+                    answerLimit: 1,
+                    timeLimit: 30,
+                    points: 1000
+                };
+            }
 
             const index = quizzes.length;
             quizzes.push(quiz);
@@ -106,69 +125,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // CONTENEUR PRINCIPAL (2 colonnes)
         const mainWrapper = document.createElement('div');
-        mainWrapper.style.display = 'grid';
-        mainWrapper.style.gridTemplateColumns = '1fr 300px';
-        mainWrapper.style.gap = '20px';
+        mainWrapper.className = "quiz-layout";
 
         // ===== COLONNE GAUCHE =====
         const editor = document.createElement('div');
         editor.className = "quiz-editor";
 
-        // QUESTION - Styling amélioré
+        // QUESTION
         const question = document.createElement('input');
         question.type = 'text';
+        question.className = "question-input";
         question.placeholder = "Écris ta question...";
         question.value = q.question;
         question.oninput = () => { q.question = question.value; };
-        question.style.width = '100%';
-        question.style.padding = '15px';
-        question.style.fontSize = '18px';
-        question.style.fontWeight = 'bold';
-        question.style.border = '3px solid #4b0082';
-        question.style.borderRadius = '8px';
-        question.style.marginBottom = '20px';
-        question.style.boxSizing = 'border-box';
-        question.style.boxShadow = '0 2px 8px rgba(75, 0, 130, 0.2)';
-        question.style.transition = 'all 0.3s ease';
-        question.onfocus = () => {
-            question.style.borderColor = '#00bfff';
-            question.style.boxShadow = '0 4px 12px rgba(0, 191, 255, 0.3)';
-        };
-        question.onblur = () => {
-            question.style.borderColor = '#4b0082';
-            question.style.boxShadow = '0 2px 8px rgba(75, 0, 130, 0.2)';
-        };
         editor.appendChild(question);
 
         // IMAGE - Carré avec preview (CENTRÉ)
         const imageContainerWrapper = document.createElement('div');
-        imageContainerWrapper.style.display = 'flex';
-        imageContainerWrapper.style.justifyContent = 'center';
-        imageContainerWrapper.style.marginBottom = '20px';
+        imageContainerWrapper.className = "image-wrapper";
 
         const imageContainer = document.createElement('div');
-        imageContainer.style.width = '250px';
-        imageContainer.style.height = '250px';
-        imageContainer.style.background = '#f0f0f0';
-        imageContainer.style.border = '3px dashed #00bfff';
-        imageContainer.style.borderRadius = '8px';
-        imageContainer.style.display = 'flex';
-        imageContainer.style.alignItems = 'center';
-        imageContainer.style.justifyContent = 'center';
-        imageContainer.style.cursor = 'pointer';
-        imageContainer.style.position = 'relative';
-        imageContainer.style.overflow = 'hidden';
-        imageContainer.style.transition = 'all 0.3s ease';
+        imageContainer.className = "image-container";
 
         const imagePreview = document.createElement('img');
-        imagePreview.style.width = '100%';
-        imagePreview.style.height = '100%';
-        imagePreview.style.objectFit = 'cover';
         imagePreview.style.display = 'none';
 
         const imagePlaceholder = document.createElement('div');
-        imagePlaceholder.style.textAlign = 'center';
-        imagePlaceholder.style.color = '#999';
+        imagePlaceholder.className = "image-placeholder";
         imagePlaceholder.innerHTML = '<div>Cliquez ou glissez une image</div>';
 
         imageContainer.appendChild(imagePreview);
@@ -263,13 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = "✕";
-                deleteBtn.style.background = "rgba(255,255,255,0.3)";
-                deleteBtn.style.border = "none";
-                deleteBtn.style.color = "white";
-                deleteBtn.style.cursor = "pointer";
-                deleteBtn.style.padding = "5px 10px";
-                deleteBtn.style.borderRadius = "4px";
-                deleteBtn.style.fontSize = "16px";
                 deleteBtn.onclick = (e) => {
                     e.preventDefault();
                     if (q.answers.length > 2) {
@@ -326,96 +302,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
         editor.appendChild(answersDiv);
 
-        // BOUTON AJOUTER RÉPONSE - Stylisé
-        const addAnswer = document.createElement('button');
-        addAnswer.textContent = "+ Ajouter réponse";
-        addAnswer.style.width = '100%';
-        addAnswer.style.padding = '12px';
-        addAnswer.style.fontSize = '16px';
-        addAnswer.style.fontWeight = 'bold';
-        addAnswer.style.background = 'linear-gradient(135deg, #00bfff, #00c853)';
-        addAnswer.style.color = 'white';
-        addAnswer.style.border = 'none';
-        addAnswer.style.borderRadius = '8px';
-        addAnswer.style.cursor = 'pointer';
-        addAnswer.style.marginTop = '15px';
-        addAnswer.style.transition = 'all 0.3s ease';
-        addAnswer.style.boxShadow = '0 4px 8px rgba(0, 191, 255, 0.3)';
-        addAnswer.onmouseover = () => {
-            addAnswer.style.transform = 'translateY(-2px)';
-            addAnswer.style.boxShadow = '0 6px 12px rgba(0, 191, 255, 0.5)';
-        };
-        addAnswer.onmouseout = () => {
-            addAnswer.style.transform = 'translateY(0)';
-            addAnswer.style.boxShadow = '0 4px 8px rgba(0, 191, 255, 0.3)';
-        };
-        addAnswer.onclick = (e) => {
-            e.preventDefault();
-            console.log('Add answer clicked');
-            if (q.answers.length >= 8) {
-                alert('Maximum 8 réponses!');
-                return;
-            }
-            const id = q.answers.length;
-            q.answers.push({
-                text: "",
-                correct: false,
-                color: COLORS[id],
-                symbol: SYMBOLS[id]
-            });
-            renderAnswers();
-        };
+        // BOUTON AJOUTER RÉPONSE - Stylisé (seulement pour quiz normal)
+        if (q.type !== 'vrai-faux') {
+            const addAnswer = document.createElement('button');
+            addAnswer.className = "btn-add-answer";
+            addAnswer.textContent = "+ Ajouter réponse";
+            addAnswer.onclick = (e) => {
+                e.preventDefault();
+                console.log('Add answer clicked');
+                if (q.answers.length >= 8) {
+                    alert('Maximum 8 réponses!');
+                    return;
+                }
+                const id = q.answers.length;
+                q.answers.push({
+                    text: "",
+                    correct: false,
+                    color: COLORS[id],
+                    symbol: SYMBOLS[id]
+                });
+                renderAnswers();
+            };
 
-        editor.appendChild(addAnswer);
+            editor.appendChild(addAnswer);
+        }
 
         // ===== COLONNE DROITE =====
         const rightPanel = document.createElement('div');
-        rightPanel.style.background = 'white';
-        rightPanel.style.padding = '20px';
-        rightPanel.style.borderRadius = '8px';
-        rightPanel.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        rightPanel.style.display = 'flex';
-        rightPanel.style.flexDirection = 'column';
-        rightPanel.style.gap = '15px';
-        rightPanel.style.height = 'fit-content';
+        rightPanel.className = "right-panel";
 
-        // LIMITE DE RÉPONSES
-        const limitLabel = document.createElement('label');
-        limitLabel.textContent = 'Limite de réponses';
-        limitLabel.style.fontWeight = 'bold';
-        limitLabel.style.color = '#333';
-        limitLabel.style.fontSize = '14px';
-        const limitInput = document.createElement('input');
-        limitInput.type = 'number';
-        limitInput.min = 1;
-        limitInput.max = 4;
-        limitInput.value = q.answerLimit;
-        limitInput.style.width = '100%';
-        limitInput.style.padding = '8px';
-        limitInput.style.border = '2px solid #00bfff';
-        limitInput.style.borderRadius = '5px';
-        limitInput.style.boxSizing = 'border-box';
-        const limitContainer = document.createElement('div');
-        limitContainer.appendChild(limitLabel);
-        limitContainer.appendChild(limitInput);
-        rightPanel.appendChild(limitContainer);
+        // LIMITE DE RÉPONSES (seulement pour quiz normal)
+        if (q.type !== 'vrai-faux') {
+            const limitLabel = document.createElement('label');
+            limitLabel.textContent = 'Limite de réponses';
+            const limitInput = document.createElement('input');
+            limitInput.type = 'number';
+            limitInput.className = "limit-input";
+            limitInput.min = 1;
+            limitInput.max = 4;
+            limitInput.value = q.answerLimit;
+            const limitContainer = document.createElement('div');
+            limitContainer.appendChild(limitLabel);
+            limitContainer.appendChild(limitInput);
+            rightPanel.appendChild(limitContainer);
+
+            limitInput.addEventListener('input', () => {
+                console.log('Limit input changed to:', limitInput.value);
+                let v = parseInt(limitInput.value);
+                if (isNaN(v)) v = 1;
+                v = Math.max(1, Math.min(4, v));
+                limitInput.value = v;
+                q.answerLimit = v;
+                updateCheckboxes();
+            });
+        }
 
         // TEMPS (en secondes)
         const timeLabel = document.createElement('label');
         timeLabel.textContent = 'Temps (secondes)';
-        timeLabel.style.fontWeight = 'bold';
-        timeLabel.style.color = '#333';
-        timeLabel.style.fontSize = '14px';
         const timeInput = document.createElement('input');
         timeInput.type = 'number';
+        timeInput.className = "time-input";
         timeInput.min = 5;
         timeInput.max = 120;
         timeInput.value = q.timeLimit;
-        timeInput.style.width = '100%';
-        timeInput.style.padding = '8px';
-        timeInput.style.border = '2px solid #ff9500';
-        timeInput.style.borderRadius = '5px';
-        timeInput.style.boxSizing = 'border-box';
         const timeContainer = document.createElement('div');
         timeContainer.appendChild(timeLabel);
         timeContainer.appendChild(timeInput);
@@ -424,35 +374,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // POINTS
         const pointsLabel = document.createElement('label');
         pointsLabel.textContent = 'Points';
-        pointsLabel.style.fontWeight = 'bold';
-        pointsLabel.style.color = '#333';
-        pointsLabel.style.fontSize = '14px';
         const pointsInput = document.createElement('input');
         pointsInput.type = 'number';
+        pointsInput.className = "points-input";
         pointsInput.min = 100;
         pointsInput.step = 100;
         pointsInput.value = q.points;
-        pointsInput.style.width = '100%';
-        pointsInput.style.padding = '8px';
-        pointsInput.style.border = '2px solid #00c853';
-        pointsInput.style.borderRadius = '5px';
-        pointsInput.style.boxSizing = 'border-box';
         const pointsContainer = document.createElement('div');
         pointsContainer.appendChild(pointsLabel);
         pointsContainer.appendChild(pointsInput);
         rightPanel.appendChild(pointsContainer);
 
-        // EVENT LISTENERS
-        limitInput.addEventListener('input', () => {
-            console.log('Limit input changed to:', limitInput.value);
-            let v = parseInt(limitInput.value);
-            if (isNaN(v)) v = 1;
-            v = Math.max(1, Math.min(4, v));
-            limitInput.value = v;
-            q.answerLimit = v;
-            updateCheckboxes();
-        });
-
+        // EVENT LISTENERS TEMPS ET POINTS
         timeInput.addEventListener('input', () => {
             console.log('Time input changed to:', timeInput.value);
             let v = parseInt(timeInput.value);
