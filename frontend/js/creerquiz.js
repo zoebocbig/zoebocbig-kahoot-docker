@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Modal management
+    
     addBtn.onclick = (e) => {
         console.log('addBtn clicked');
         e.preventDefault();
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Handle modal button clicks
     modalBtns.forEach((btn, btnIdx) => {
         btn.onclick = (e) => {
             e.preventDefault();
