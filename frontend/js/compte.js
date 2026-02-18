@@ -1,42 +1,70 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const quizListDiv = document.getElementById("quizList");
+    const createBtn = document.getElementById("createQuizBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-    const quizList = document.getElementById('quizList');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    // Déconnexion
-    logoutBtn.onclick = () => {
-        fetch("/api/logout", { method: "POST" })
-            .then(() => {
-                window.location.href = "login.html";
+    // Charger les quiz de l'utilisateur
+    async function loadQuizzes() {
+        try {
+            const res = await fetch("http://localhost:5000/api/my-quizzes", {
+                credentials: "include"
             });
+            const data = await res.json();
+
+            if (!data.success) {
+                quizListDiv.innerHTML = "<p>Erreur : Vous devez être connecté.</p>";
+                return;
+            }
+
+            if (data.quizzes.length === 0) {
+                quizListDiv.innerHTML = "<p>Vous n'avez créé aucun quiz pour le moment.</p>";
+                return;
+            }
+
+            quizListDiv.innerHTML = "";
+            data.quizzes.forEach(q => {
+                const card = document.createElement("div");
+                card.className = "quiz-card";
+
+                const title = document.createElement("h3");
+                title.textContent = q.title + " (" + q.type + ")";
+                card.appendChild(title);
+
+                const editBtn = document.createElement("button");
+                editBtn.textContent = "Éditer";
+                editBtn.className = "edit";
+                editBtn.onclick = () => {
+                    window.location.href = "creerquiz.html?quizId=" + q.id;
+                };
+                card.appendChild(editBtn);
+
+                const playBtn = document.createElement("button");
+                playBtn.textContent = "Jouer";
+                playBtn.className = "play";
+                playBtn.onclick = () => {
+                    alert("Lancer le quiz " + q.title); // À remplacer par le lancement réel
+                };
+                card.appendChild(playBtn);
+
+                quizListDiv.appendChild(card);
+            });
+
+        } catch (err) {
+            console.error(err);
+            quizListDiv.innerHTML = "<p>Erreur serveur, réessayez plus tard.</p>";
+        }
+    }
+
+    // Créer un nouveau quiz
+    createBtn.onclick = () => {
+        window.location.href = "creerquiz.html";
     };
 
-    // Récupérer les quizzes de l'utilisateur connecté
-    fetch("/api/my-quizzes")
-        .then(r => r.json())
-        .then(data => {
-            if(data.success && data.quizzes.length > 0){
-                data.quizzes.forEach(q => {
-                    const card = document.createElement('div');
-                    card.className = "quiz-card";
+    // Déconnexion
+    logoutBtn.onclick = async () => {
+        await fetch("http://localhost:5000/api/logout", { method: "POST", credentials: "include" });
+        window.location.href = "home.html";
+    };
 
-                    const title = document.createElement('h2');
-                    title.textContent = q.title;
-
-                    const type = document.createElement('p');
-                    type.textContent = `Type : ${q.type}`;
-
-                    const editBtn = document.createElement('button');
-                    editBtn.textContent = "Éditer";
-                    editBtn.onclick = () => {
-                        window.location.href = `creerquiz.html?quiz_id=${q.id}`;
-                    };
-
-                    card.append(title, type, editBtn);
-                    quizList.appendChild(card);
-                });
-            } else {
-                quizList.textContent = "Vous n'avez créé aucun quiz pour le moment.";
-            }
-        });
+    loadQuizzes();
 });

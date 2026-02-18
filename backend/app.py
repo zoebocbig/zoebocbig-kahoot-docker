@@ -15,68 +15,58 @@ from database import (
 # ---------------- FLASK ----------------
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 app.secret_key = "SUPER_SECRET_KEY"
-CORS(app)
 
+# CORS avec credentials activés et origine autorisée
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:8080"}})
 # ---------------- INIT DB ----------------
-init_db()  # Crée toutes les tables si elles n'existent pas
+init_db()
 
 API_KEY = "TA_CLE_API_ICI"
 
 # ---------------- API QUIZ ----------------
-
 @app.route("/api/create-room", methods=["POST"])
 def api_create_room():
     data = request.get_json()
     if request.headers.get("x-api-key") != API_KEY:
         return jsonify({"message": "Clé API invalide"}), 403
-
     if not create_room(data["roomCode"], data["roomName"]):
         return jsonify({"message": "Room déjà existante"}), 400
-
     return jsonify({"success": True})
-
 
 @app.route("/api/join-quiz", methods=["POST"])
 def api_join_quiz():
     data = request.get_json()
     if not join_room(data["roomCode"], data["username"]):
         return jsonify({"message": "Room inexistante"}), 404
-
     return jsonify({"success": True})
-
 
 @app.route("/api/add-question", methods=["POST"])
 def api_add_question():
     data = request.get_json()
     if not add_question(data["roomCode"], data["question"], data["answer"]):
         return jsonify({"message": "Room inexistante"}), 404
-
     return jsonify({"success": True})
-
 
 @app.route("/api/questions/<room_code>")
 def api_get_questions(room_code):
     return jsonify(get_questions(room_code))
 
 # ---------------- AUTH ----------------
-
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.get_json()
     if create_user(data["email"], data["password"]):
         return jsonify({"success": True})
-    return jsonify({"success": False})
-
+    return jsonify({"success": False, "message": "Email déjà utilisé"})
 
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.get_json()
     user = login_user(data["email"], data["password"])
     if user:
-        session["user"] = user[0]  # stocke l'id
+        session["user"] = user[0]  # stocke l'id de l'utilisateur
         return jsonify({"success": True})
-    return jsonify({"success": False})
-
+    return jsonify({"success": False, "message": "Email ou mot de passe incorrect"})
 
 @app.route("/api/logout", methods=["POST"])
 def logout():
@@ -84,20 +74,17 @@ def logout():
     return jsonify({"success": True})
 
 # ---------------- PROTECTION CREATEUR ----------------
-
 @app.route("/creerquiz.html")
 def creator():
     if "user" not in session:
         return redirect("/login.html")
     return send_from_directory(app.static_folder, "creerquiz.html")
 
-
 @app.route("/compte.html")
 def compte_page():
     if "user" not in session:
         return redirect("/login.html")
     return send_from_directory(app.static_folder, "compte.html")
-
 
 @app.route("/api/my-quizzes")
 def my_quizzes():
@@ -108,7 +95,6 @@ def my_quizzes():
     return jsonify({"success": True, "quizzes": quizzes})
 
 # ---------------- FRONTEND ----------------
-
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):

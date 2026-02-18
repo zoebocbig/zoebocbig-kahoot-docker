@@ -1,33 +1,34 @@
-const email = document.getElementById("email");
-const password = document.getElementById("password");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const registerBtn = document.getElementById("registerBtn");
 
-document.getElementById("registerBtn").onclick = async () => {
+registerBtn.onclick = async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        alert("Merci de remplir tous les champs.");
+        return;
+    }
+
     try {
         const res = await fetch("http://localhost:5000/api/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                email: email.value,
-                password: password.value
-            })
+            credentials: "include",
+            body: JSON.stringify({ email, password })
         });
-
-        const contentType = res.headers.get("Content-Type") || "";
-        if (!contentType.includes("application/json")) {
-            console.error("Réponse non JSON brute :", await res.text());
-            alert("Erreur serveur : réponse invalide");
-            return;
-        }
 
         const data = await res.json();
 
         if (data.success) {
-            window.location.href = "login.html"; // redirection vers login après création
+            alert("Compte créé avec succès !");
+            window.location.href = "login.html";
         } else {
-            alert("Compte déjà existant");
+            alert(data.message || "Impossible de créer le compte.");
         }
     } catch (err) {
         console.error(err);
-        alert("Impossible de contacter le serveur");
+        alert("Erreur serveur, réessaye plus tard.");
     }
 };

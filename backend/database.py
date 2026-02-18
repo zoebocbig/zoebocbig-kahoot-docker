@@ -66,33 +66,29 @@ def init_db():
     conn.commit()
     print("Base initialisée")
 
-
 # -------------------
-# Fonctions pour app.py
-# -------------------
-
 # Rooms
+# -------------------
 def create_room(room_code, room_name):
     try:
         cursor.execute("INSERT INTO rooms (room_code, room_name) VALUES (?, ?)", (room_code, room_name))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
-        return False  # Room déjà existante
+        return False
 
 def join_room(room_code, username):
     cursor.execute("SELECT * FROM rooms WHERE room_code = ?", (room_code,))
     room = cursor.fetchone()
     return room is not None
 
-
+# -------------------
 # Questions & Réponses
+# -------------------
 def add_question(room_code, question_text, answer_list):
-    # Ajouter la question
     cursor.execute("INSERT INTO questions (room_code, text) VALUES (?, ?)", (room_code, question_text))
     question_id = cursor.lastrowid
 
-    # Ajouter les réponses
     for ans in answer_list:
         cursor.execute(
             "INSERT INTO answers (question_id, text, is_correct, color, symbol) VALUES (?, ?, ?, ?, ?)",
@@ -116,7 +112,6 @@ def get_questions(room_code):
 
     return result
 
-
 # -------------------
 # Utilisateurs
 # -------------------
@@ -132,18 +127,17 @@ def create_user(email, password):
         conn.commit()
         return True
     except sqlite3.IntegrityError:
-        return False  # Email déjà utilisé
+        return False
 
 def login_user(email, password):
     cursor.execute(
         "SELECT * FROM users WHERE email=? AND password=?",
         (email, hash_password(password))
     )
-    return cursor.fetchone()  # retourne None si pas trouvé
-
+    return cursor.fetchone()
 
 # -------------------
-# Quizzes liés à un créateur
+# Quizzes
 # -------------------
 def add_quiz(title, type, creator_id):
     cursor.execute(
@@ -157,7 +151,6 @@ def get_user_quizzes(user_id):
     cursor.execute("SELECT id, title, type FROM quizzes WHERE creator_id = ?", (user_id,))
     rows = cursor.fetchall()
     return [{"id": r[0], "title": r[1], "type": r[2]} for r in rows]
-
 
 # -------------------
 # Fermer la DB

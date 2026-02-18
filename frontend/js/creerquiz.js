@@ -1,6 +1,3 @@
-if(!localStorage.getItem("creator")){
-    location.href="login.html";
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('creerquiz.js: DOMContentLoaded');
