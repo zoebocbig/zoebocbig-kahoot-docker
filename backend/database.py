@@ -1,17 +1,18 @@
 import sqlite3
 import hashlib
 
-# Connexion à la base de données (fichier quiz.db)
+# -------------------
+# Connexion à la base de données
+# -------------------
 conn = sqlite3.connect('quiz.db', check_same_thread=False)
 cursor = conn.cursor()
 
 # -------------------
-# Initialisation
+# Initialisation des tables
 # -------------------
 def init_db():
-    """Crée les tables si elles n'existent pas encore"""
-
-    # Table des utilisateurs
+    """Crée toutes les tables si elles n'existent pas"""
+    # Table utilisateurs
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +21,7 @@ def init_db():
     )
     """)
 
-    # Table des rooms
+    # Table rooms
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS rooms (
         room_code TEXT PRIMARY KEY,
@@ -28,7 +29,7 @@ def init_db():
     )
     """)
 
-    # Table des questions
+    # Table questions
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS questions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +40,7 @@ def init_db():
     )
     """)
 
-    # Table des réponses
+    # Table answers / réponses
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS answers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +53,7 @@ def init_db():
     )
     """)
 
-    # Table des quizzes
+    # Table quizzes
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS quizzes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,6 +68,30 @@ def init_db():
     print("Base initialisée")
 
 # -------------------
+# Utilisateurs
+# -------------------
+def hash_password(pwd):
+    return hashlib.sha256(pwd.encode()).hexdigest()
+
+def create_user(email, password):
+    try:
+        cursor.execute(
+            "INSERT INTO users (email, password) VALUES (?, ?)",
+            (email, hash_password(password))
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False  # Email déjà utilisé
+
+def login_user(email, password):
+    cursor.execute(
+        "SELECT * FROM users WHERE email=? AND password=?",
+        (email, hash_password(password))
+    )
+    return cursor.fetchone()  # None si pas trouvé
+
+# -------------------
 # Rooms
 # -------------------
 def create_room(room_code, room_name):
@@ -79,16 +104,17 @@ def create_room(room_code, room_name):
 
 def join_room(room_code, username):
     cursor.execute("SELECT * FROM rooms WHERE room_code = ?", (room_code,))
-    room = cursor.fetchone()
-    return room is not None
+    return cursor.fetchone() is not None
 
 # -------------------
-# Questions & Réponses
+# Questions et réponses
 # -------------------
 def add_question(room_code, question_text, answer_list):
+    # Ajouter la question
     cursor.execute("INSERT INTO questions (room_code, text) VALUES (?, ?)", (room_code, question_text))
     question_id = cursor.lastrowid
 
+    # Ajouter les réponses
     for ans in answer_list:
         cursor.execute(
             "INSERT INTO answers (question_id, text, is_correct, color, symbol) VALUES (?, ?, ?, ?, ?)",
@@ -113,36 +139,15 @@ def get_questions(room_code):
     return result
 
 # -------------------
-# Utilisateurs
-# -------------------
-def hash_password(pwd):
-    return hashlib.sha256(pwd.encode()).hexdigest()
-
-def create_user(email, password):
-    try:
-        cursor.execute(
-            "INSERT INTO users (email, password) VALUES (?, ?)",
-            (email, hash_password(password))
-        )
-        conn.commit()
-        return True
-    except sqlite3.IntegrityError:
-        return False
-
-def login_user(email, password):
-    cursor.execute(
-        "SELECT * FROM users WHERE email=? AND password=?",
-        (email, hash_password(password))
-    )
-    return cursor.fetchone()
-
-# -------------------
 # Quizzes
 # -------------------
-def add_quiz(title, type, creator_id):
+def add_quiz(title, type_, creator_id):
+    """
+    Enregistre un nouveau quiz dans la table 'quizzes' lié à l'utilisateur connecté
+    """
     cursor.execute(
         "INSERT INTO quizzes (title, type, creator_id) VALUES (?, ?, ?)",
-        (title, type, creator_id)
+        (title, type_, creator_id)
     )
     conn.commit()
     return cursor.lastrowid
@@ -153,7 +158,7 @@ def get_user_quizzes(user_id):
     return [{"id": r[0], "title": r[1], "type": r[2]} for r in rows]
 
 # -------------------
-# Fermer la DB
+# Fermer la base
 # -------------------
 def close_db():
     conn.close()

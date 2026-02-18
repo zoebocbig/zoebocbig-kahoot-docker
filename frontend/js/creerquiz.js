@@ -431,4 +431,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderAnswers();
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+    const saveBtn = document.getElementById("saveQuizBtn");
+
+    saveBtn.onclick = async () => {
+        // Récupère le titre et type du quiz depuis tes champs
+        const title = document.getElementById("quizTitle").value;
+        const type = document.getElementById("quizType").value;
+
+        if (!title || !type) {
+            alert("Merci de remplir le titre et le type du quiz.");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:5000/api/add-quiz", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ title, type })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                alert("Quiz enregistré avec succès !");
+                window.location.href = "compte.html"; // retour dans la bibliothèque
+            } else {
+                alert(data.message || "Erreur lors de l'enregistrement");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Erreur serveur, réessayez plus tard.");
+        }
+    };
+});
+
 });

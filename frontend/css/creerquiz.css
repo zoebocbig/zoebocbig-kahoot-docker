@@ -333,3 +333,8 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(255, 87, 51, 0.3);
 }
+
+.enrg{
+    background: #ff3333;
+    color: white;
+}

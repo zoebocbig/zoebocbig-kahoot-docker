@@ -52,6 +52,23 @@ def api_add_question():
 def api_get_questions(room_code):
     return jsonify(get_questions(room_code))
 
+@app.route("/api/add-quiz", methods=["POST"])
+def add_quiz_api():
+    if "user" not in session:
+        return jsonify({"success": False, "message": "Non connecté"}), 403
+
+    data = request.get_json()
+    title = data.get("title")
+    type_ = data.get("type")
+
+    if not title or not type_:
+        return jsonify({"success": False, "message": "Titre et type requis"}), 400
+
+    user_id = session["user"]
+    quiz_id = add_quiz(title, type_, user_id)  # fonction dans database.py
+    return jsonify({"success": True, "quiz_id": quiz_id})
+
+
 # ---------------- AUTH ----------------
 @app.route("/api/register", methods=["POST"])
 def register():
