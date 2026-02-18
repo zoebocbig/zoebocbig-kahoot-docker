@@ -1,9 +1,10 @@
 const form = document.getElementById("joinForm");
 const message = document.getElementById("message");
 
-const API_URL = "http://backend:5000/api";
+const API_URL = "http://localhost:5000/api"; // change selon ton setup
 const API_KEY = "TA_CLE_API_ICI";
 
+// Rejoindre un quiz
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -35,18 +36,19 @@ form.addEventListener("submit", async (e) => {
         message.textContent = "Serveur indisponible";
         console.error(err);
     }
-
 });
 
-document.querySelector(".create").addEventListener("click", () => {
-    window.location.href = "/creer.html";
+// Bouton "Créer" => accès libre à creerquiz.html
+document.getElementById("createBtn").addEventListener("click", () => {
+    window.location.href = "creer.html"; // plus de blocage
 });
 
+// Bouton "Apprentissage"
 document.querySelector(".learn").onclick = () => {
-    window.location.href = "/learn.html";
+    window.location.href = "learn.html";
 };
 
+// Bouton "Compte" (login)
 document.getElementById("creatorBtn").addEventListener("click", () => {
     window.location.href = "login.html";
 });
-

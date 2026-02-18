@@ -11,25 +11,22 @@
 <body>
 
 <header class="top-bar">
-    
-
     <div class="top-buttons">
-        <button class="btn create">Créer</button>
+        <button class="btn create" id="createBtn">Créer</button>
         <button class="btn learn">Apprentissage</button>
     </div>
 
     <div class="compte">
-        <button id="creatorBtn">compte</button>
+        <button id="creatorBtn">Compte</button>
     </div>
 </header>
-
 
 <main class="main">
     <div class="container">
         <h1>Quiz</h1>
 
         <form id="joinForm">
-            <input type="text" placeholder="Code PIN du jeu" required>
+            <input type="text" id="roomCode" placeholder="Code PIN du jeu" required>
             <button type="submit">Valider</button>
         </form>
 

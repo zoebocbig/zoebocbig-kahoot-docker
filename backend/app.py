@@ -18,8 +18,9 @@ app.secret_key = "SUPER_SECRET_KEY"
 
 # CORS avec credentials activés et origine autorisée
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:8080"}})
+
 # ---------------- INIT DB ----------------
-init_db()
+init_db()  # Crée toutes les tables si elles n'existent pas
 
 API_KEY = "TA_CLE_API_ICI"
 
@@ -73,19 +74,20 @@ def logout():
     session.pop("user", None)
     return jsonify({"success": True})
 
-# ---------------- PROTECTION CREATEUR ----------------
+# ---------------- PAGES CREER ----------------
 @app.route("/creerquiz.html")
-def creator():
+def creer_quiz_page():
+    # Protection par compte
     if "user" not in session:
         return redirect("/login.html")
     return send_from_directory(app.static_folder, "creerquiz.html")
 
-@app.route("/compte.html")
-def compte_page():
-    if "user" not in session:
-        return redirect("/login.html")
-    return send_from_directory(app.static_folder, "compte.html")
+@app.route("/creer.html")
+def creer_page():
+    # Libre, accessible par tout le monde
+    return send_from_directory(app.static_folder, "creer.html")
 
+# ---------------- API MY QUIZZES ----------------
 @app.route("/api/my-quizzes")
 def my_quizzes():
     if "user" not in session:

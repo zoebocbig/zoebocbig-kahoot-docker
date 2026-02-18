@@ -55,9 +55,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Créer un nouveau quiz
-    createBtn.onclick = () => {
-        window.location.href = "creerquiz.html";
+    // 🔑 Redirection vers creer.html pour créer un nouveau quiz
+    createQuizBtn.onclick = () => {
+        window.location.href = "creer.html";
     };
 
     // Déconnexion
