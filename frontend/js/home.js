@@ -45,3 +45,8 @@ document.querySelector(".create").addEventListener("click", () => {
 document.querySelector(".learn").onclick = () => {
     window.location.href = "/learn.html";
 };
+
+document.getElementById("creatorBtn").addEventListener("click", () => {
+    window.location.href = "login.html";
+});
+

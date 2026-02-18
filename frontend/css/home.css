@@ -13,14 +13,14 @@ body {
     color: white;
 }
 
-/* TOP BAR */
 .top-bar {
     height: 60px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    position: relative;
 }
+
 
 .logo {
     font-size: 26px;
@@ -121,3 +121,25 @@ body {
     font-size: 14px;
     color: red;
 }
+
+.compte {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+}
+
+#creatorBtn {
+    background: #ff2f92;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#creatorBtn:hover {
+    opacity: 0.9;
+}
+
+
