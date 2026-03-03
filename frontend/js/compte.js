@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const quizListDiv = document.getElementById("quizList");
-    const createBtn = document.getElementById("createQuizBtn");
+    const createQuizBtn = document.getElementById("createQuizBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // Charger les quiz de l'utilisateur
+    // ---------------- CHARGER LES QUIZZES ----------------
     async function loadQuizzes() {
         try {
             const res = await fetch("http://localhost:5000/api/my-quizzes", {
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             quizListDiv.innerHTML = "";
+
             data.quizzes.forEach(q => {
                 const card = document.createElement("div");
                 card.className = "quiz-card";
@@ -30,19 +31,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 title.textContent = q.title + " (" + q.type + ")";
                 card.appendChild(title);
 
+                // Bouton Éditer
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Éditer";
                 editBtn.className = "edit";
                 editBtn.onclick = () => {
-                    window.location.href = "creerquiz.html?quizId=" + q.id;
+                    window.location.href = "creerquiz.html?edit=" + q.id;
                 };
                 card.appendChild(editBtn);
 
+                // Bouton Supprimer
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Supprimer";
+                deleteBtn.style.background = "#ff4c4c"; // rouge
+                deleteBtn.style.marginBottom = "5px";
+                deleteBtn.onclick = async () => {
+                    if(confirm("Supprimer ce quiz ?")){
+                        await fetch(`http://localhost:5000/api/delete-quiz/${q.id}`, {
+                            method: "DELETE",
+                            credentials: "include"
+                        });
+                        loadQuizzes(); // recharger la liste
+                    }
+                };
+                card.appendChild(deleteBtn);
+
+                // Bouton Jouer
                 const playBtn = document.createElement("button");
                 playBtn.textContent = "Jouer";
                 playBtn.className = "play";
                 playBtn.onclick = () => {
-                    alert("Lancer le quiz " + q.title); // À remplacer par le lancement réel
+                    alert("Lancer le quiz " + q.title); // remplacer par la logique réelle
                 };
                 card.appendChild(playBtn);
 
@@ -55,12 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 🔑 Redirection vers creer.html pour créer un nouveau quiz
+    // ---------------- CRÉER UN NOUVEAU QUIZ ----------------
     createQuizBtn.onclick = () => {
-        window.location.href = "creer.html";
+        window.location.href = "creerquiz.html";
     };
 
-    // Déconnexion
+    // ---------------- DÉCONNEXION ----------------
     logoutBtn.onclick = async () => {
         await fetch("http://localhost:5000/api/logout", { method: "POST", credentials: "include" });
         window.location.href = "home.html";

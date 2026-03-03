@@ -334,7 +334,24 @@ body {
     box-shadow: 0 4px 8px rgba(255, 87, 51, 0.3);
 }
 
-.enrg{
-    background: #ff3333;
+.enrg {
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    padding: 15px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #00c853, #00bfff);
     color: white;
+    font-weight: bold;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    z-index: 2000;
+}
+
+.enrg:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
 }

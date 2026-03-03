@@ -431,41 +431,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderAnswers();
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-    const saveBtn = document.getElementById("saveQuizBtn");
-
-    saveBtn.onclick = async () => {
-        // Récupère le titre et type du quiz depuis tes champs
-        const title = document.getElementById("quizTitle").value;
-        const type = document.getElementById("quizType").value;
-
-        if (!title || !type) {
-            alert("Merci de remplir le titre et le type du quiz.");
+// BOUTON ENREGISTRER QUIZ
+    const saveQuizBtn = document.getElementById("saveQuizBtn");
+if(saveQuizBtn){
+    saveQuizBtn.addEventListener("click", async () => {
+        if(quizzes.length === 0){
+            alert("Ajoute au moins une question !");
             return;
         }
 
-        try {
+        const title = prompt("Titre du quiz :", "Quiz du " + new Date().toLocaleDateString());
+        if(!title) return;
+
+        // Déterminer le type global du quiz
+        const type = quizzes.some(q => q.type === "vrai-faux") ? "vrai-faux" : "quiz";
+
+        try{
             const res = await fetch("http://localhost:5000/api/add-quiz", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 credentials: "include",
-                body: JSON.stringify({ title, type })
+                body: JSON.stringify({ title, type, questions: quizzes })
             });
-
             const data = await res.json();
-
-            if (data.success) {
-                alert("Quiz enregistré avec succès !");
-                window.location.href = "compte.html"; // retour dans la bibliothèque
+            if(data.success){
+                alert("Quiz enregistré !");
+                window.location.href = "compte.html"; // redirection
             } else {
                 alert(data.message || "Erreur lors de l'enregistrement");
             }
-        } catch (err) {
+        } catch(err){
             console.error(err);
-            alert("Erreur serveur, réessayez plus tard.");
+            alert("Erreur serveur.");
         }
-    };
-});
-
+    });
+}
 });
