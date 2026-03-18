@@ -2,34 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Kahoot Clone</title>
+    <title>Rejoindre un quiz</title>
     <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 
-<!-- TOP BAR -->
-<header class="top-bar">
-    
+<h1>Rejoindre un quiz</h1>
 
-    <div class="top-buttons">
-        <button class="btn create">Créer</button>
-        <button class="btn learn">Apprentissage</button>
-    </div>
-</header>
+<input type="text" id="roomCode" placeholder="Code PIN du jeu">
+<button id="joinBtn">Rejoindre</button>
 
-<!-- MAIN -->
-<main class="main">
-    <div class="container">
-        <h1>Quiz</h1>
-
-        <form id="joinForm">
-            <input type="text" placeholder="Code PIN du jeu" required>
-            <button type="submit">Valider</button>
-        </form>
-
-        <p id="message"></p>
-    </div>
-</main>
+<p id="message"></p>
 
 <script src="js/home.js"></script>
 </body>

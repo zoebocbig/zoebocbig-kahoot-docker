@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Compte - Mes Quiz</title>
+    <link rel="stylesheet" href="css/compte.css">
+</head>
+<body>
+
+<header class="top-bar">
+    <h1>Mon Compte</h1>
+    <div class="actions">
+        <button id="createQuizBtn">Créer un Quiz</button>
+        <button id="logoutBtn">Se Déconnecter</button>
+    </div>
+</header>
+
+<main class="main">
+
+    <!-- Section 1 : Mes quiz -->
+    <section id="myQuizzesSection">
+        <h2>Mes Quiz</h2>
+        <div id="quizList">
+            <p>Chargement de vos quiz...</p>
+        </div>
+    </section>
+
+    <!-- Section 2 : Mes codes PIN -->
+    <section id="myPinsSection">
+        <h2>Mes codes PIN</h2>
+        <table id="pinsTable">
+            <thead>
+                <tr>
+                    <th>Nom du Quiz</th>
+                    <th>Code PIN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rempli via JS -->
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<script src="js/compte.js"></script>
+</body>
+</html>

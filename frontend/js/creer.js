@@ -4,15 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(btnQuiz) {
         btnQuiz.addEventListener('click', () => {
-            alert("Tu vas créer un quiz simple !");
-            
+            window.location.href = 'creerquiz.html'; 
         });
     }
 
     if(btnQuizDoc) {
         btnQuizDoc.addEventListener('click', () => {
-            alert("Tu vas créer un quiz avec document !");
-            
+            window.location.href = 'creerquiz.html'; 
         });
     }
 });
