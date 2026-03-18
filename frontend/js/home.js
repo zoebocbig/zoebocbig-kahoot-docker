@@ -1,37 +1,27 @@
 const form = document.getElementById("joinForm");
+const joinBtn = document.getElementById("joinBtn");
 const message = document.getElementById("message");
 
-const API_URL = "http://localhost:5000/api"; // change selon ton setup
-const API_KEY = "TA_CLE_API_ICI";
+const API_URL = "http://localhost:5000/api"; // changer selon ton setup
 
-// Rejoindre un quiz
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const roomCode = document.getElementById("roomCode").value;
+joinBtn.addEventListener("click", async () => {
+    const roomCode = document.getElementById("roomCode").value.trim();
+    if (!roomCode) return message.textContent = "Entrez un code PIN";
 
     try {
         const res = await fetch(`${API_URL}/join-quiz`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": API_KEY
-            },
-            body: JSON.stringify({
-                username: "Player",
-                roomCode: roomCode
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pin: roomCode })
         });
-
         const data = await res.json();
 
-        if (!res.ok) {
-            message.textContent = data.message || "Erreur";
-            return;
+        if (data.success) {
+            message.textContent = "Quiz trouvé !";
+            window.location.href = `/quiz.html?pin=${roomCode}`;
+        } else {
+            message.textContent = "PIN invalide";
         }
-
-        window.location.href = `/quiz.html?roomCode=${roomCode}`;
-
     } catch (err) {
         message.textContent = "Serveur indisponible";
         console.error(err);
@@ -39,16 +29,16 @@ form.addEventListener("submit", async (e) => {
 });
 
 // Bouton "Créer" => accès libre à creerquiz.html
-document.getElementById("createBtn").addEventListener("click", () => {
-    window.location.href = "creer.html"; // plus de blocage
+document.getElementById("createBtn")?.addEventListener("click", () => {
+    window.location.href = "creerquiz.html";
 });
 
 // Bouton "Apprentissage"
-document.querySelector(".learn").onclick = () => {
+document.querySelector(".learn")?.addEventListener("click", () => {
     window.location.href = "learn.html";
-};
+});
 
-// Bouton "Compte" (login)
-document.getElementById("creatorBtn").addEventListener("click", () => {
+// Bouton "Compte"
+document.getElementById("creatorBtn")?.addEventListener("click", () => {
     window.location.href = "login.html";
 });

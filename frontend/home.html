@@ -2,37 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>Kahoot Clone</title>
+    <title>Rejoindre un quiz</title>
     <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 
-<header class="top-bar">
-    <div class="top-buttons">
-        <button class="btn create" id="createBtn">Créer</button>
-        <button class="btn learn">Apprentissage</button>
-    </div>
+<h1>Rejoindre un quiz</h1>
 
-    <div class="compte">
-        <button id="creatorBtn">Compte</button>
-    </div>
-</header>
+<input type="text" id="roomCode" placeholder="Code PIN du jeu">
+<button id="joinBtn">Rejoindre</button>
 
-<main class="main">
-    <div class="container">
-        <h1>Quiz</h1>
-
-        <form id="joinForm">
-            <input type="text" id="roomCode" placeholder="Code PIN du jeu" required>
-            <button type="submit">Valider</button>
-        </form>
-
-        <p id="message"></p>
-    </div>
-</main>
+<p id="message"></p>
 
 <script src="js/home.js"></script>
 </body>
