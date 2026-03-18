@@ -4,11 +4,14 @@ const message = document.getElementById("message");
 const API_URL = "http://localhost:5000/api"; // changer selon ton setup
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Formulaire rejoindre quiz
+    // ---------------- Formulaire rejoindre quiz ----------------
     form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // empêcher le reload de page
         const roomCode = document.getElementById("roomCode").value.trim();
-        if (!roomCode) return message.textContent = "Entrez un code PIN";
+        if (!roomCode) {
+            message.textContent = "Entrez un code PIN";
+            return;
+        }
 
         try {
             const res = await fetch(`${API_URL}/join-quiz`, {
@@ -20,7 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.success) {
                 message.textContent = "Quiz trouvé !";
-                window.location.href = `/quiz.html?pin=${roomCode}`;
+                // Redirection vers la page jouer.html avec le PIN
+                window.location.href = `/jouer.html?pin=${roomCode}`;
             } else {
                 message.textContent = "PIN invalide";
             }
@@ -30,21 +34,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Bouton "Créer"
+    // ---------------- Bouton "Créer" ----------------
     document.getElementById("createBtn")?.addEventListener("click", () => {
         window.location.href = "creerquiz.html";
     });
 
-    // Bouton "Apprentissage"
+    // ---------------- Bouton "Apprentissage" ----------------
     document.querySelector(".learn")?.addEventListener("click", () => {
         window.location.href = "learn.html";
     });
 
-    // Bouton "Compte"
+    // ---------------- Bouton "Compte" ----------------
     const creatorBtn = document.getElementById("creatorBtn");
     if (creatorBtn) {
         creatorBtn.addEventListener("click", () => {
-            window.location.href = "login.html"; 
+            window.location.href = "login.html";
         });
     }
 });
