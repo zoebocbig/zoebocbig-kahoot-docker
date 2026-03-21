@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const pin = urlParams.get('pin');
+
     const quizContainer = document.getElementById('quizContainer');
     const scoreContainer = document.getElementById('scoreContainer');
     const scoreSpan = document.getElementById('score');
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pin })
         });
+
         const data = await res.json();
 
         if (!data.success) {
@@ -25,8 +27,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const quiz = data.quiz;
+
         let currentQuestion = 0;
         let score = 0;
+
+        let timer;
+        let timeLeft;
+        let answered = false;
 
         function showQuestion() {
             if (currentQuestion >= quiz.questions.length) {
@@ -37,23 +44,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const q = quiz.questions[currentQuestion];
+
             quizContainer.innerHTML = `
                 <h2>Question ${currentQuestion + 1} / ${quiz.questions.length}</h2>
-                <p>${q.question}</p>
-                ${q.image ? `<img src="${q.image}" alt="Question image" style="max-width:300px;">` : ""}
+                <p class="question">${q.question}</p>
+                <p class="timer">⏱️ Temps restant : <span id="timer"></span>s</p>
+                ${q.image ? `<img src="${q.image}" class="question-img">` : ""}
                 <div id="answers"></div>
             `;
 
             const answersDiv = document.getElementById('answers');
+
+            // TIMER
+            timeLeft = q.timeLimit;
+            answered = false;
+
+            document.getElementById("timer").textContent = timeLeft;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    currentQuestion++;
+                    setTimeout(showQuestion, 500);
+                }
+            }, 1000);
+
+            // REPONSES
             q.answers.forEach(a => {
                 const btn = document.createElement('button');
                 btn.textContent = a.text;
                 btn.style.background = a.color || '#333';
+
                 btn.onclick = () => {
-                    if (a.correct) score++;
+                    if (answered) return;
+                    answered = true;
+
+                    clearInterval(timer);
+
+                    // Calcul des points dynamique
+                    if (a.correct) {
+                        let points = Math.floor(q.points * (timeLeft / q.timeLimit));
+                        score += points;
+                    }
+
                     currentQuestion++;
-                    showQuestion();
+
+                    setTimeout(showQuestion, 800);
                 };
+
                 answersDiv.appendChild(btn);
             });
         }

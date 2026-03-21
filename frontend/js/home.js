@@ -34,15 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ---------------- Bouton "Créer" ----------------
-    document.getElementById("createBtn")?.addEventListener("click", () => {
-        window.location.href = "creerquiz.html";
-    });
-
-    // ---------------- Bouton "Apprentissage" ----------------
-    document.querySelector(".learn")?.addEventListener("click", () => {
-        window.location.href = "learn.html";
-    });
 
     // ---------------- Bouton "Compte" ----------------
     const creatorBtn = document.getElementById("creatorBtn");
