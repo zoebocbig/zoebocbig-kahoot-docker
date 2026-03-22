@@ -15,6 +15,7 @@ def init_db():
         password TEXT
     )""")
 
+    # Ajout player_limit ici, default 5
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS quizzes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,10 +23,10 @@ def init_db():
         type TEXT,
         creator_id INTEGER,
         pin TEXT UNIQUE,
+        player_limit INTEGER DEFAULT 5,
         FOREIGN KEY(creator_id) REFERENCES users(id)
     )""")
 
-    # ✅ TABLE CORRIGÉE
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS questions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,9 +71,11 @@ def login_user(email, password):
     return cursor.fetchone()
 
 # ---------------- QUIZZES ----------------
-def add_quiz(title, type_, questions, creator_id, pin):
-    cursor.execute("INSERT INTO quizzes (title, type, creator_id, pin) VALUES (?, ?, ?, ?)",
-                   (title, type_, creator_id, pin))
+def add_quiz(title, type_, questions, creator_id, pin, player_limit=5):
+    cursor.execute(
+        "INSERT INTO quizzes (title, type, creator_id, pin, player_limit) VALUES (?, ?, ?, ?, ?)",
+        (title, type_, creator_id, pin, player_limit)
+    )
     quiz_id = cursor.lastrowid
 
     for q in questions:
@@ -162,11 +165,11 @@ def delete_quiz(quiz_id):
     return True
 
 def get_user_quizzes(user_id):
-    cursor.execute("SELECT id, title, type, pin FROM quizzes WHERE creator_id=?", (user_id,))
-    return [{"id": r[0], "title": r[1], "type": r[2], "pin": r[3]} for r in cursor.fetchall()]
+    cursor.execute("SELECT id, title, type, pin, player_limit FROM quizzes WHERE creator_id=?", (user_id,))
+    return [{"id": r[0], "title": r[1], "type": r[2], "pin": r[3], "player_limit": r[4]} for r in cursor.fetchall()]
 
 def get_quiz(quiz_id):
-    cursor.execute("SELECT id, title, type, pin FROM quizzes WHERE id=?", (quiz_id,))
+    cursor.execute("SELECT id, title, type, pin, player_limit FROM quizzes WHERE id=?", (quiz_id,))
     quiz = cursor.fetchone()
     if not quiz:
         return None
@@ -196,6 +199,7 @@ def get_quiz(quiz_id):
         "title": quiz[1],
         "type": quiz[2],
         "pin": quiz[3],
+        "player_limit": quiz[4],
         "questions": questions
     }
 

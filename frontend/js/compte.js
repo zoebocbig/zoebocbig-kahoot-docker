@@ -62,15 +62,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 quizListDiv.appendChild(card);
 
-                // Section 2 : tableau PIN
-                const row = document.createElement("tr");
-                const nameCell = document.createElement("td");
-                nameCell.innerText = q.title;
-                const pinCell = document.createElement("td");
-                pinCell.innerText = q.pin || "Non défini";
-                row.appendChild(nameCell);
-                row.appendChild(pinCell);
-                pinsTableBody.appendChild(row);
+               // Section 2 : tableau PIN avec limite de joueurs
+               const row = document.createElement("tr");
+               row.innerHTML = `
+                <td>${q.title}</td>
+                <td>${q.pin || "Non défini"}</td>
+                <td>
+                <input type="number" id="max_${q.pin}" value="5" min="1" style="width:60px;">
+                </td>
+                <td>
+                <button onclick="setMax('${q.pin}')">OK</button>
+                </td>
+               `;
+               pinsTableBody.appendChild(row);
             });
 
         } catch (err) {
@@ -88,6 +92,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetch("http://localhost:5000/api/logout", { method: "POST", credentials: "include" });
         window.location.href = "home.html";
     };
+
+
+    // Fonction pour modifier la limite de joueurs
+window.setMax = function(pin) {
+    const val = parseInt(document.getElementById("max_" + pin).value);
+    if(val < 1) {
+        alert("Le nombre de joueurs doit être au moins 1 !");
+        return;
+    }
+    socket.emit("set_max_players", { pin: pin, max: val });
+    alert("Limite de joueurs mise à jour !");
+}
 
     loadQuizzes();
 });

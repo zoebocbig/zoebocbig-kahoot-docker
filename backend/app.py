@@ -2,10 +2,13 @@ from flask import Flask, request, jsonify, session, redirect, send_from_director
 from flask_cors import CORS
 from database import init_db, create_user, login_user, add_quiz, update_quiz, delete_quiz, get_user_quizzes, get_quiz, pin_exists, get_quiz_by_pin
 import random
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
 app = Flask(__name__, static_folder="../frontend", static_url_path="")
 app.secret_key = "SUPER_SECRET_KEY"
 CORS(app, supports_credentials=True)
+
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=False, async_mode="eventlet")
 
 init_db()
 
@@ -48,7 +51,6 @@ def add_quiz_api():
         return jsonify({"success": False}), 403
 
     data = request.get_json()
-
     pin = generate_unique_pin()
 
     quiz_id = add_quiz(
@@ -59,13 +61,8 @@ def add_quiz_api():
         pin
     )
 
-    return jsonify({
-        "success": True,
-        "quiz_id": quiz_id,
-        "pin": pin
-    })
+    return jsonify({"success": True, "quiz_id": quiz_id, "pin": pin})
 
-# 👉 NOUVEAU : rejoindre avec PIN
 @app.route("/api/join-quiz", methods=["POST"])
 def join_quiz():
     data = request.get_json()
@@ -76,10 +73,7 @@ def join_quiz():
     if not quiz:
         return jsonify({"success": False, "message": "PIN invalide"})
 
-    return jsonify({
-        "success": True,
-        "quiz": quiz
-    })
+    return jsonify({"success": True, "quiz": quiz})
 
 @app.route("/api/update-quiz/<int:quiz_id>", methods=["POST"])
 def update_quiz_api(quiz_id):
@@ -123,6 +117,83 @@ def quiz_api(quiz_id):
         "quiz": quiz
     })
 
+# ---------------- SOCKETIO MULTIJOUEUR ----------------
+rooms = {}
+
+@socketio.on("join_room")
+def handle_join(data):
+    pin = data["pin"]
+    pseudo = data["pseudo"]
+
+    join_room(pin)
+
+    if pin not in rooms:
+        rooms[pin] = {
+            "players": {},
+            "started": False,
+            "max_players": 999
+        }
+
+    # ❌ room pleine
+    if len(rooms[pin]["players"]) >= rooms[pin]["max_players"]:
+        emit("room_full")
+        return
+
+    rooms[pin]["players"][pseudo] = 0
+
+    emit("lobby_update", {
+        "players": list(rooms[pin]["players"].keys()),
+        "max": rooms[pin]["max_players"]
+    }, room=pin)
+
+    # ✅ auto start si plein
+    if len(rooms[pin]["players"]) >= rooms[pin]["max_players"]:
+        rooms[pin]["started"] = True
+        emit("quiz_started", {}, room=pin)
+
+
+@socketio.on("set_max_players")
+def set_max(data):
+    pin = data["pin"]
+    max_players = int(data["max"])
+
+    if pin not in rooms:
+        rooms[pin] = {
+            "players": {},
+            "started": False,
+            "max_players": max_players
+        }
+    else:
+        rooms[pin]["max_players"] = max_players
+
+
+@socketio.on("start_quiz")
+def handle_start(data):
+    pin = data["pin"]
+
+    if pin in rooms:
+        rooms[pin]["started"] = True
+        emit("quiz_started", {}, room=pin)
+
+
+@socketio.on("answer")
+def handle_answer(data):
+    pin = data["pin"]
+    pseudo = data["pseudo"]
+    points = data.get("points", 0)
+
+    if pin in rooms and pseudo in rooms[pin]["players"]:
+        rooms[pin]["players"][pseudo] += points
+
+    leaderboard = sorted(
+        [{"name": p, "score": s} for p, s in rooms[pin]["players"].items()],
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    emit("leaderboard", leaderboard, room=pin)
+
+
 # ---------------- PAGES ----------------
 @app.route("/creerquiz.html")
 def creer_quiz_page():
@@ -146,5 +217,7 @@ def serve_frontend(path):
             pass
     return send_from_directory(app.static_folder, "home.html")
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    import eventlet
+    socketio.run(app, host="0.0.0.0", port=5000)

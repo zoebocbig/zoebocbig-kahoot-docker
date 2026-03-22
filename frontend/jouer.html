@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Jouer au Quiz</title>
     <link rel="stylesheet" href="css/jouer.css">
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 </head>
 <body>
 
@@ -12,14 +13,31 @@
 </header>
 
 <main class="main">
-    <div id="quizContainer">
-        <p id="loadingMessage">Chargement du quiz...</p>
+
+    <!-- LOBBY / SALLE D'ATTENTE -->
+    <div id="lobbyContainer">
+        <h2>Lobby - En attente des joueurs</h2>
+        <div id="lobby">
+            <p>Chargement des joueurs...</p>
+        </div>
+        <button id="startBtn">Commencer le quiz</button>
     </div>
 
+    <!-- QUIZ -->
+    <div id="quizContainer" style="display:none;">
+        <p id="loadingMessage">Chargement du quiz...</p>
+        <div id="answers"></div>
+    </div>
+
+    <!-- SCORE / FIN -->
     <div id="scoreContainer" style="display:none;">
         <h2>Score : <span id="score">0</span></h2>
         <button id="restartBtn">Rejouer</button>
     </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard"></div>
+
 </main>
 
 <script src="js/jouer.js"></script>
