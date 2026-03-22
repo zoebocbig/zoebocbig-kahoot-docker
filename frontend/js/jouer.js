@@ -1,78 +1,128 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const pin = new URLSearchParams(window.location.search).get('pin');
+    const urlParams = new URLSearchParams(window.location.search);
+    const pin = urlParams.get('pin');
 
     const quizContainer = document.getElementById('quizContainer');
-    const leaderboardDiv = document.getElementById('leaderboard');
+    const scoreContainer = document.getElementById('scoreContainer');
+    const scoreSpan = document.getElementById('score');
+    const restartBtn = document.getElementById('restartBtn');
 
-    const name = prompt("Pseudo ?");
-    if (!name) return location.href = "/";
-
-    const socket = io();
-
-    const res = await fetch("/api/join-quiz", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ pin })
-    });
-
-    const quiz = (await res.json()).quiz;
-
-    socket.emit("join", {
-        pin,
-        name,
-        max_players: quiz.max_players
-    });
-
-    socket.on("players_update", (players) => {
-        leaderboardDiv.innerHTML = "<h3>Joueurs</h3>" + players.map(p => `<p>${p}</p>`).join("");
-    });
-
-    socket.on("quiz_start", () => {
-        startQuiz();
-    });
-
-    socket.on("leaderboard", (players) => {
-        leaderboardDiv.innerHTML = "<h3>Classement</h3>" +
-            players.map((p,i)=>`<p>${i+1}. ${p.name} - ${p.score}</p>`).join("");
-    });
-
-    let current = 0;
-    let score = 0;
-
-    function startQuiz() {
-        showQuestion();
+    if (!pin) {
+        quizContainer.innerHTML = "<p>PIN invalide ou manquant.</p>";
+        return;
     }
 
-    function showQuestion() {
-        if (current >= quiz.questions.length) {
-            quizContainer.innerHTML = `<h2>Score: ${score}</h2>`;
+    // ---------------- SOCKET ----------------
+    const socket = io("http://localhost:5000");
+
+    const pseudo = prompt("Pseudo ?");
+    if (!pseudo) {
+        window.location.href = "/";
+        return;
+    }
+
+    socket.emit("join_room", {
+        pin: pin,
+        pseudo: pseudo
+    });
+
+    // Leaderboard (debug console pour l'instant)
+    socket.on("leaderboard", (players) => {
+        console.log("Classement :", players);
+    });
+
+    try {
+        const res = await fetch(`http://localhost:5000/api/join-quiz`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pin })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            quizContainer.innerHTML = "<p>PIN invalide.</p>";
             return;
         }
 
-        const q = quiz.questions[current];
+        const quiz = data.quiz;
 
-        quizContainer.innerHTML = `
-            <h2>${q.question}</h2>
-            <div id="answers"></div>
-        `;
+        let currentQuestion = 0;
+        let score = 0;
+        let timerInterval = null;
 
-        const div = document.getElementById("answers");
+        function showQuestion() {
+            if (timerInterval) clearInterval(timerInterval);
 
-        q.answers.forEach(a => {
-            const btn = document.createElement("button");
-            btn.textContent = a.text;
+            if (currentQuestion >= quiz.questions.length) {
+                quizContainer.style.display = "none";
+                scoreContainer.style.display = "block";
+                scoreSpan.textContent = score;
+                return;
+            }
 
-            btn.onclick = () => {
-                let pts = a.correct ? q.points : 0;
-                score += pts;
+            const q = quiz.questions[currentQuestion];
 
-                socket.emit("answer", { pin, name, points: pts });
+            quizContainer.innerHTML = `
+                <h2>Question ${currentQuestion + 1} / ${quiz.questions.length}</h2>
+                <p>${q.question}</p>
+                ${q.image ? `<img src="${q.image}" style="max-width:300px;">` : ""}
+                <p id="timer"></p>
+                <div id="answers"></div>
+            `;
 
-                current++;
-                showQuestion();
-            };
+            const answersDiv = document.getElementById('answers');
+            const timerDiv = document.getElementById("timer");
 
-            div.appendChild(btn);
-        });
+            // ---------------- TIMER ----------------
+            let timeLeft = q.timeLimit || 10;
+
+            timerDiv.textContent = "Temps restant : " + timeLeft + "s";
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDiv.textContent = "Temps restant : " + timeLeft + "s";
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    currentQuestion++;
+                    showQuestion();
+                }
+            }, 1000);
+
+            // ---------------- REPONSES ----------------
+            q.answers.forEach(a => {
+                const btn = document.createElement('button');
+                btn.textContent = a.text;
+                btn.style.background = a.color || '#333';
+
+                btn.onclick = () => {
+                    clearInterval(timerInterval);
+
+                    let pts = a.correct ? q.points : 0;
+                    score += pts;
+
+                    // 🔥 ENVOI AU SERVEUR
+                    socket.emit("answer", {
+                        pin: pin,
+                        pseudo: pseudo,
+                        points: pts
+                    });
+
+                    currentQuestion++;
+                    showQuestion();
+                };
+
+                answersDiv.appendChild(btn);
+            });
+        }
+
+        restartBtn.onclick = () => window.location.reload();
+
+        showQuestion();
+
+    } catch (err) {
+        console.error(err);
+        quizContainer.innerHTML = "<p>Erreur serveur, réessayez plus tard.</p>";
     }
 });
