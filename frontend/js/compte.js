@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             pinsTableBody.innerHTML = "";
 
             data.quizzes.forEach(q => {
-                // --- Section 1 : liste classique ---
+                // --- Carte Quiz ---
                 const card = document.createElement("div");
                 card.className = "quiz-card";
 
@@ -36,13 +36,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 title.textContent = q.title + " (" + q.type + ")";
                 card.appendChild(title);
 
-                // Boutons
+                // Éditer
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Éditer";
                 editBtn.className = "edit";
                 editBtn.onclick = () => window.location.href = "creerquiz.html?edit=" + q.id;
                 card.appendChild(editBtn);
 
+                // Supprimer
                 const deleteBtn = document.createElement("button");
                 deleteBtn.textContent = "Supprimer";
                 deleteBtn.style.background = "#ff4c4c";
@@ -57,15 +58,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
                 card.appendChild(deleteBtn);
 
+                // Lancer quiz
                 const playBtn = document.createElement("button");
-                playBtn.textContent = "Jouer";
-                playBtn.className = "play";
-                playBtn.onclick = () => alert("Lancer le quiz " + q.title);
+                playBtn.textContent = "Lancer";
+                playBtn.style.background = "#4CAF50";
+                playBtn.onclick = async () => {
+                    if (!q.pin) {
+                        alert("PIN non défini pour ce quiz.");
+                        return;
+                    }
+
+                    try {
+                        // Prévenir le serveur que le quiz démarre pour tous les joueurs
+                        await fetch("http://localhost:5000/api/start-quiz", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify({ pin: q.pin })
+                        });
+
+                        alert(`Quiz "${q.title}" lancé !`);
+                    } catch (err) {
+                        console.error(err);
+                        alert("Impossible de lancer le quiz.");
+                    }
+                };
                 card.appendChild(playBtn);
 
                 quizListDiv.appendChild(card);
 
-                // --- Section 2 : tableau PIN ---
+                // --- Tableau PIN ---
                 const row = document.createElement("tr");
                 const nameCell = document.createElement("td");
                 nameCell.innerText = q.title;
@@ -83,10 +105,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ---------------- CRÉER UN NOUVEAU QUIZ ----------------
+    // Créer un nouveau quiz
     createQuizBtn.onclick = () => window.location.href = "creerquiz.html";
 
-    // ---------------- DÉCONNEXION ----------------
+    // Déconnexion
     logoutBtn.onclick = async () => {
         await fetch("http://localhost:5000/api/logout", { method: "POST", credentials: "include" });
         window.location.href = "home.html";
