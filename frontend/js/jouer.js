@@ -1,17 +1,19 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const pin = urlParams.get("pin");
 
-    if (!pin) { 
-        alert("PIN manquant !"); 
-        return; 
+    if (!pin) {
+        alert("PIN manquant !");
+        return;
     }
 
-    const pseudo = prompt("Entrez votre pseudo") || "Joueur";
+    const pseudoInput = document.getElementById("pseudoInput");
+    const joinBtn = document.getElementById("joinBtn");
     const quizContainer = document.getElementById("quizContainer");
+    const pseudoContainer = document.getElementById("pseudoContainer");
 
     // ---------------- JOIN QUIZ ----------------
-    async function joinQuiz() {
+    async function joinQuiz(pseudo) {
         try {
             const res = await fetch("/api/join-quiz", {
                 method: "POST",
@@ -20,13 +22,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify({ pin, pseudo })
             });
             const data = await res.json();
-            if (!data.success) { 
-                alert(data.message || "PIN invalide !"); 
-                return null; 
+            if (!data.success) {
+                alert(data.message || "PIN invalide !");
+                joinBtn.disabled = false;
+                return null;
             }
             return data.quiz;
         } catch (err) {
             console.error("Erreur joinQuiz:", err);
+            joinBtn.disabled = false;
             return null;
         }
     }
@@ -34,53 +38,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ---------------- WAIT QUIZ START ----------------
     async function waitForStart() {
         try {
-            console.log("Ping serveur pour vérifier le quiz..."); // log pour debug
             const res = await fetch(`/api/quiz-status?pin=${pin}`, {
-                method: "GET",
-                credentials: "include" // inclut la session pour reconnaitre l'utilisateur
-            });
-            const data = await res.json();
-            console.log("Status quiz:", data); // log pour debug
-
-            if (data.started) {
-                startQuiz();
-            } else {
-                quizContainer.innerHTML = "<p>En attente que le quiz commence...</p>";
-                setTimeout(waitForStart, 1000); // relancer toutes les 1s
-            }
-        } catch (err) {
-            console.error("Erreur ping serveur:", err);
-            setTimeout(waitForStart, 3000); // réessayer plus tard si erreur
-        }
-    }
-
-    // ---------------- SUBMIT SCORE ----------------
-    async function submitScore(score) {
-        try {
-            await fetch("/api/submit-score", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ pin, pseudo, points: score })
-            });
-        } catch (err) {
-            console.error("Erreur submitScore:", err);
-        }
-    }
-
-    // ---------------- SHOW LEADERBOARD ----------------
-    async function showLeaderboard() {
-        try {
-            const res = await fetch(`/api/leaderboard/${pin}`, {
                 method: "GET",
                 credentials: "include"
             });
             const data = await res.json();
+            if (data.started) {
+                loadCurrentQuestion();
+            } else {
+                quizContainer.innerHTML = "<p>En attente que le quiz commence...</p>";
+                setTimeout(waitForStart, 1000);
+            }
+        } catch (err) {
+            console.error("Erreur ping serveur:", err);
+            setTimeout(waitForStart, 3000);
+        }
+    }
+
+    // ---------------- CURRENT QUESTION ----------------
+    async function loadCurrentQuestion() {
+        const res = await fetch(`/api/current-question?pin=${pin}`, { credentials: "include" });
+        const data = await res.json();
+        if (!data.success) return;
+
+        if (data.finished) {
+            showLeaderboard();
+            return;
+        }
+
+        const q = data.question;
+
+        // Affichage du quiz avec style
+        quizContainer.innerHTML = `
+            <div class="question-container">
+                <p class="question-text">${q.question}</p>
+                <div class="answers-container"></div>
+                <p class="timer">Temps restant : <span id="timer">${q.timeLimit}</span>s</p>
+            </div>
+        `;
+
+        const answersDiv = quizContainer.querySelector(".answers-container");
+        q.answers.forEach((a, idx) => {
+            const btn = document.createElement("button");
+            btn.textContent = a.text;
+            btn.style.backgroundColor = a.color || "#ccc";
+            btn.onclick = async () => {
+                await fetch("/api/answer", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ pin, pseudo: pseudoInput.value.trim(), answer_index: idx }),
+                    credentials: "include"
+                });
+                loadCurrentQuestion();
+            };
+            answersDiv.appendChild(btn);
+        });
+
+        // Timer countdown
+        let time = q.timeLimit;
+        const timerSpan = document.getElementById("timer");
+        const timerInterval = setInterval(() => {
+            time--;
+            timerSpan.textContent = time;
+            if (time <= 0) {
+                clearInterval(timerInterval);
+                loadCurrentQuestion();
+            }
+        }, 1000);
+    }
+
+    // ---------------- LEADERBOARD ----------------
+    async function showLeaderboard() {
+        try {
+            const res = await fetch(`/api/leaderboard/${pin}`, { credentials: "include" });
+            const data = await res.json();
             if (!data.success) return;
 
-            const leaderboard = data.leaderboard;
             let html = "<h2>Classement</h2><ol>";
-            leaderboard.forEach(p => { html += `<li>${p.name} : ${p.score}</li>`; });
+            data.leaderboard.forEach(p => html += `<li>${p.name} : ${p.score}</li>`);
             html += "</ol>";
             quizContainer.innerHTML = html;
         } catch (err) {
@@ -88,39 +123,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ---------------- START QUIZ ----------------
-    async function startQuiz() {
-        const quiz = await joinQuiz();
-        if (!quiz) return;
+    // ---------------- JOIN BUTTON ----------------
+    joinBtn.addEventListener("click", async () => {
+        const pseudo = pseudoInput.value.trim() || "Joueur";
+        joinBtn.disabled = true;
+        pseudoInput.disabled = true;
 
-        let current = 0;
-        let score = 0;
-
-        function showQuestion(index) {
-            if (index >= quiz.questions.length) {
-                quizContainer.innerHTML = `<h2>Quiz terminé !</h2><p>Score : ${score}</p><button id="leaderBtn">Voir classement</button>`;
-                submitScore(score); // envoyer score final
-                document.getElementById("leaderBtn").onclick = showLeaderboard;
-                return;
-            }
-
-            const q = quiz.questions[index];
-            quizContainer.innerHTML = `<p>${q.question}</p>`;
-            q.answers.forEach(a => {
-                const btn = document.createElement("button");
-                btn.textContent = a.text;
-                btn.onclick = () => {
-                    if(a.correct) score++;
-                    current++;
-                    showQuestion(current);
-                };
-                quizContainer.appendChild(btn);
-            });
+        const quiz = await joinQuiz(pseudo);
+        if (quiz) {
+            // Masquer le formulaire pseudo
+            pseudoContainer.style.display = "none";
+            // Afficher message attente
+            quizContainer.innerHTML = "<p>En attente que le quiz commence...</p>";
+            waitForStart();
         }
-
-        showQuestion(current);
-    }
-
-    // ---------------- LANCER ----------------
-    waitForStart();
+    });
 });

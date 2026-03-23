@@ -23,7 +23,7 @@ def generate_unique_pin():
 quizzes_state = {}
 for quiz in get_all_quizzes():
     pin = quiz["pin"]
-    quizzes_state[pin] = {"started": False, "players": {}}
+    quizzes_state[pin] = {"started": False, "current_question": 0, "players": {}}
 
 # ---------------- AUTH ----------------
 @app.route("/api/register", methods=["POST"])
@@ -55,7 +55,7 @@ def add_quiz_api():
     data = request.get_json()
     pin = generate_unique_pin()
     quiz_id = add_quiz(data.get("title"), data.get("type"), data.get("questions", []), session["user"], pin)
-    quizzes_state[pin] = {"started": False, "players": {}}
+    quizzes_state[pin] = {"started": False, "current_question": 0, "players": {}}
     return jsonify({"success": True, "quiz_id": quiz_id, "pin": pin})
 
 @app.route("/api/my-quizzes")
@@ -70,6 +70,7 @@ def api_start_quiz():
     pin = data.get("pin")
     if pin in quizzes_state:
         quizzes_state[pin]["started"] = True
+        quizzes_state[pin]["current_question"] = 0
         return jsonify({"success": True})
     return jsonify({"success": False, "message": "PIN invalide"}), 404
 
@@ -88,28 +89,57 @@ def join_quiz():
     if not quiz:
         return jsonify({"success": False, "message": "PIN invalide"})
     if pin not in quizzes_state:
-        quizzes_state[pin] = {"started": False, "players": {}}
+        quizzes_state[pin] = {"started": False, "current_question": 0, "players": {}}
     quizzes_state[pin]["players"].setdefault(pseudo, 0)
     return jsonify({"success": True, "quiz": quiz})
 
-@app.route("/api/submit-score", methods=["POST"])
-def submit_score():
+# ---------------- CURRENT QUESTION ----------------
+@app.route("/api/current-question", methods=["GET"])
+def current_question():
+    pin = request.args.get("pin")
+    if pin not in quizzes_state:
+        return jsonify({"success": False, "message": "PIN invalide"}), 404
+
+    state = quizzes_state[pin]
+    quiz = get_quiz_by_pin(pin)
+    index = state["current_question"]
+
+    if index >= len(quiz["questions"]):
+        return jsonify({"success": True, "finished": True})
+
+    return jsonify({"success": True, "question": quiz["questions"][index], "index": index})
+
+@app.route("/api/answer", methods=["POST"])
+def answer_question():
     data = request.get_json()
-    pin, pseudo, points = data.get("pin"), data.get("pseudo"), data.get("points", 0)
+    pin, pseudo, answer_index = data.get("pin"), data.get("pseudo"), data.get("answer_index")
+
     if pin not in quizzes_state or pseudo not in quizzes_state[pin]["players"]:
         return jsonify({"success": False}), 404
-    quizzes_state[pin]["players"][pseudo] = points
-    return jsonify({"success": True})
 
+    state = quizzes_state[pin]
+    quiz = get_quiz_by_pin(pin)
+    index = state["current_question"]
+    question = quiz["questions"][index]
+
+    if question["answers"][answer_index].get("correct"):
+        state["players"][pseudo] += question["points"]
+
+    # Pour simplifier, avancer immédiatement à la question suivante
+    state["current_question"] += 1
+    return jsonify({"success": True, "score": state["players"][pseudo]})
+
+# ---------------- LEADERBOARD ----------------
 @app.route("/api/leaderboard/<pin>")
 def leaderboard(pin):
     if pin not in quizzes_state:
         return jsonify({"success": False}), 404
     players = quizzes_state[pin]["players"]
-    leaderboard = sorted([{"name": p, "score": s} for p, s in players.items()], key=lambda x: x["score"], reverse=True)
+    leaderboard = sorted([{"name": p, "score": s} for p, s in players.items()],
+                         key=lambda x: x["score"], reverse=True)
     return jsonify({"success": True, "leaderboard": leaderboard})
 
-# ---------------- CRUD ----------------
+# ---------------- CRUD / STATIC / PAGES ----------------
 @app.route("/api/update-quiz/<int:quiz_id>", methods=["POST"])
 def update_quiz_api(quiz_id):
     if "user" not in session:
@@ -134,7 +164,6 @@ def quiz_api(quiz_id):
         return jsonify({"success": False})
     return jsonify({"success": True, "quiz": quiz})
 
-# ---------------- STATIC FILES ----------------
 @app.route("/js/<path:filename>")
 def serve_js(filename):
     return send_from_directory(os.path.join(app.static_folder, "js"), filename)
@@ -143,7 +172,6 @@ def serve_js(filename):
 def serve_css(filename):
     return send_from_directory(os.path.join(app.static_folder, "css"), filename)
 
-# ---------------- PAGES ----------------
 @app.route("/creerquiz.html")
 def creer_quiz_page():
     if "user" not in session:
@@ -166,6 +194,5 @@ def serve_frontend(path):
             pass
     return send_from_directory(app.static_folder, "home.html")
 
-# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
