@@ -7,6 +7,7 @@ def get_db_connection():
 conn = get_db_connection()
 cursor = conn.cursor()
 
+# ---------------- INIT DB ----------------
 def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
@@ -15,7 +16,6 @@ def init_db():
         password TEXT
     )""")
 
-    # Ajout player_limit ici, default 5
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS quizzes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,16 +58,20 @@ def hash_password(pwd):
 
 def create_user(email, password):
     try:
-        cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)",
-                       (email, hash_password(password)))
+        cursor.execute(
+            "INSERT INTO users (email, password) VALUES (?, ?)",
+            (email, hash_password(password))
+        )
         conn.commit()
         return True
     except sqlite3.IntegrityError:
         return False
 
 def login_user(email, password):
-    cursor.execute("SELECT * FROM users WHERE email=? AND password=?",
-                   (email, hash_password(password)))
+    cursor.execute(
+        "SELECT * FROM users WHERE email=? AND password=?",
+        (email, hash_password(password))
+    )
     return cursor.fetchone()
 
 # ---------------- QUIZZES ----------------
@@ -107,6 +111,46 @@ def add_quiz(title, type_, questions, creator_id, pin, player_limit=5):
     conn.commit()
     return quiz_id
 
+def get_quiz(quiz_id):
+    cursor.execute(
+        "SELECT id, title, type, pin, player_limit FROM quizzes WHERE id=?",
+        (quiz_id,)
+    )
+    quiz = cursor.fetchone()
+    if not quiz:
+        return None
+
+    cursor.execute("""
+    SELECT id, text, image_path, time_limit, points, answer_limit
+    FROM questions WHERE quiz_id=?
+    """, (quiz_id,))
+    questions_db = cursor.fetchall()
+
+    questions = []
+    for q in questions_db:
+        cursor.execute(
+            "SELECT text, is_correct, color, symbol FROM answers WHERE question_id=?",
+            (q[0],)
+        )
+        answers = [{"text": a[0], "correct": bool(a[1]), "color": a[2], "symbol": a[3]} for a in cursor.fetchall()]
+        questions.append({
+            "question": q[1],
+            "image": q[2],
+            "timeLimit": q[3],
+            "points": q[4],
+            "answerLimit": q[5],
+            "answers": answers
+        })
+
+    return {
+        "id": quiz[0],
+        "title": quiz[1],
+        "type": quiz[2],
+        "pin": quiz[3],
+        "player_limit": quiz[4],
+        "questions": questions
+    }
+
 def get_quiz_by_pin(pin):
     cursor.execute("SELECT id FROM quizzes WHERE pin=?", (pin,))
     result = cursor.fetchone()
@@ -114,9 +158,12 @@ def get_quiz_by_pin(pin):
         return None
     return get_quiz(result[0])
 
+def get_all_quizzes():
+    cursor.execute("SELECT id, pin FROM quizzes")
+    return [{"id": r[0], "pin": r[1]} for r in cursor.fetchall()]
+
 def update_quiz(quiz_id, title, type_, questions):
     cursor.execute("UPDATE quizzes SET title=?, type=? WHERE id=?", (title, type_, quiz_id))
-
     cursor.execute("SELECT id FROM questions WHERE quiz_id=?", (quiz_id,))
     question_ids = [q[0] for q in cursor.fetchall()]
 
@@ -155,53 +202,19 @@ def update_quiz(quiz_id, title, type_, questions):
 def delete_quiz(quiz_id):
     cursor.execute("SELECT id FROM questions WHERE quiz_id=?", (quiz_id,))
     question_ids = [q[0] for q in cursor.fetchall()]
-
     for qid in question_ids:
         cursor.execute("DELETE FROM answers WHERE question_id=?", (qid,))
     cursor.execute("DELETE FROM questions WHERE quiz_id=?", (quiz_id,))
     cursor.execute("DELETE FROM quizzes WHERE id=?", (quiz_id,))
-
     conn.commit()
     return True
 
 def get_user_quizzes(user_id):
-    cursor.execute("SELECT id, title, type, pin, player_limit FROM quizzes WHERE creator_id=?", (user_id,))
+    cursor.execute(
+        "SELECT id, title, type, pin, player_limit FROM quizzes WHERE creator_id=?",
+        (user_id,)
+    )
     return [{"id": r[0], "title": r[1], "type": r[2], "pin": r[3], "player_limit": r[4]} for r in cursor.fetchall()]
-
-def get_quiz(quiz_id):
-    cursor.execute("SELECT id, title, type, pin, player_limit FROM quizzes WHERE id=?", (quiz_id,))
-    quiz = cursor.fetchone()
-    if not quiz:
-        return None
-
-    cursor.execute("""
-    SELECT id, text, image_path, time_limit, points, answer_limit
-    FROM questions WHERE quiz_id=?
-    """, (quiz_id,))
-    questions_db = cursor.fetchall()
-
-    questions = []
-    for q in questions_db:
-        cursor.execute("SELECT text, is_correct, color, symbol FROM answers WHERE question_id=?", (q[0],))
-        answers = [{"text": a[0], "correct": bool(a[1]), "color": a[2], "symbol": a[3]} for a in cursor.fetchall()]
-
-        questions.append({
-            "question": q[1],
-            "image": q[2],
-            "timeLimit": q[3],
-            "points": q[4],
-            "answerLimit": q[5],
-            "answers": answers
-        })
-
-    return {
-        "id": quiz[0],
-        "title": quiz[1],
-        "type": quiz[2],
-        "pin": quiz[3],
-        "player_limit": quiz[4],
-        "questions": questions
-    }
 
 def pin_exists(pin):
     cursor.execute("SELECT id FROM quizzes WHERE pin=?", (pin,))
