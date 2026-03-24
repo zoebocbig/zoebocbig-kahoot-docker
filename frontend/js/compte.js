@@ -51,8 +51,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const playBtn = document.createElement("button");
                 playBtn.textContent = "Lancer";
                 playBtn.style.background = "#4CAF50";
-                playBtn.onclick = async () => {
-                    if (!q.pin) { alert("PIN non défini"); return; }
+                playBtn.type = "button"; // <- important pour éviter un nouvel onglet
+                playBtn.onclick = async (e) => {
+                    e.preventDefault(); // <- empêche tout comportement par défaut
+                    if (!q.pin) { 
+                        alert("PIN non défini"); 
+                        return; 
+                    }
                     // Démarrer le quiz côté serveur
                     await fetch("/api/start-quiz", {
                         method: "POST",
@@ -60,7 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         body: JSON.stringify({ pin: q.pin }),
                         credentials: "include"
                     });
-                    window.open(`jouer.html?pin=${q.pin}`, "_blank");
+                    // On peut afficher un message ou activer l'interface salle d'attente ici
+                    alert("Le quiz a été lancé ! Les joueurs peuvent maintenant y participer.");
                 };
                 card.appendChild(playBtn);
 
