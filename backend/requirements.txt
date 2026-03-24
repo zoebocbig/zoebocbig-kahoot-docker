@@ -1,4 +1,7 @@
 Flask
 flask-cors
+flask-socketio
+eventlet
+gevent
 gunicorn
 python-dotenv

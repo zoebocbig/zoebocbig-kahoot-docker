@@ -21,17 +21,6 @@ body {
     position: relative;
 }
 
-
-.logo {
-    font-size: 26px;
-    font-weight: bold;
-}
-
-.logo span {
-    color: #ffcc00;
-}
-
-/* TOP BUTTONS */
 .top-buttons {
     display: flex;
     gap: 10px;
@@ -60,7 +49,6 @@ body {
     opacity: 0.9;
 }
 
-/* MAIN CENTER */
 .main {
     height: calc(100vh - 60px);
     display: flex;
@@ -68,7 +56,6 @@ body {
     align-items: center;
 }
 
-/* FORM CARD */
 .container {
     background: white;
     width: 360px;
@@ -85,11 +72,6 @@ body {
     margin-bottom: 25px;
 }
 
-.container h1 span {
-    color: #ffcc00;
-}
-
-/* INPUT */
 .container input {
     width: 100%;
     padding: 14px;
@@ -100,7 +82,6 @@ body {
     text-align: center;
 }
 
-/* BUTTON */
 .container button {
     width: 100%;
     padding: 14px;
@@ -141,5 +122,3 @@ body {
 #creatorBtn:hover {
     opacity: 0.9;
 }
-
-

@@ -4,12 +4,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const createQuizBtn = document.getElementById("createQuizBtn");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // ---------------- CHARGER LES QUIZZES ----------------
     async function loadQuizzes() {
         try {
-            const res = await fetch("http://localhost:5000/api/my-quizzes", {
-                credentials: "include"
-            });
+            const res = await fetch("/api/my-quizzes", { credentials: "include" });
             const data = await res.json();
 
             if (!data.success) {
@@ -28,19 +25,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             pinsTableBody.innerHTML = "";
 
             data.quizzes.forEach(q => {
-                // --- Section 1 : liste classique ---
                 const card = document.createElement("div");
                 card.className = "quiz-card";
 
                 const title = document.createElement("h3");
-                title.textContent = q.title + " (" + q.type + ")";
+                title.textContent = `${q.title} (${q.type})`;
                 card.appendChild(title);
 
-                // Boutons
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Éditer";
-                editBtn.className = "edit";
-                editBtn.onclick = () => window.location.href = "creerquiz.html?edit=" + q.id;
+                editBtn.onclick = () => window.location.href = `creerquiz.html?edit=${q.id}`;
                 card.appendChild(editBtn);
 
                 const deleteBtn = document.createElement("button");
@@ -48,31 +42,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                 deleteBtn.style.background = "#ff4c4c";
                 deleteBtn.onclick = async () => {
                     if(confirm("Supprimer ce quiz ?")) {
-                        await fetch(`http://localhost:5000/api/delete-quiz/${q.id}`, {
-                            method: "DELETE",
-                            credentials: "include"
-                        });
+                        await fetch(`/api/delete-quiz/${q.id}`, { method: "DELETE", credentials: "include" });
                         loadQuizzes();
                     }
                 };
                 card.appendChild(deleteBtn);
 
                 const playBtn = document.createElement("button");
-                playBtn.textContent = "Jouer";
-                playBtn.className = "play";
-                playBtn.onclick = () => alert("Lancer le quiz " + q.title);
+                playBtn.textContent = "Lancer";
+                playBtn.style.background = "#4CAF50";
+                playBtn.type = "button"; // <- important pour éviter un nouvel onglet
+                playBtn.onclick = async (e) => {
+                    e.preventDefault(); // <- empêche tout comportement par défaut
+                    if (!q.pin) { 
+                        alert("PIN non défini"); 
+                        return; 
+                    }
+                    // Démarrer le quiz côté serveur
+                    await fetch("/api/start-quiz", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ pin: q.pin }),
+                        credentials: "include"
+                    });
+                    // On peut afficher un message ou activer l'interface salle d'attente ici
+                    alert("Le quiz a été lancé ! Les joueurs peuvent maintenant y participer.");
+                };
                 card.appendChild(playBtn);
 
                 quizListDiv.appendChild(card);
 
-                // --- Section 2 : tableau PIN ---
+                // Ajouter dans le tableau PIN
                 const row = document.createElement("tr");
-                const nameCell = document.createElement("td");
-                nameCell.innerText = q.title;
-                const pinCell = document.createElement("td");
-                pinCell.innerText = q.pin || "Non défini";
-                row.appendChild(nameCell);
-                row.appendChild(pinCell);
+                row.innerHTML = `<td>${q.title}</td><td>${q.pin || "Non défini"}</td>`;
                 pinsTableBody.appendChild(row);
             });
 
@@ -83,12 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ---------------- CRÉER UN NOUVEAU QUIZ ----------------
     createQuizBtn.onclick = () => window.location.href = "creerquiz.html";
-
-    // ---------------- DÉCONNEXION ----------------
     logoutBtn.onclick = async () => {
-        await fetch("http://localhost:5000/api/logout", { method: "POST", credentials: "include" });
+        await fetch("/api/logout", { method: "POST", credentials: "include" });
         window.location.href = "home.html";
     };
 
