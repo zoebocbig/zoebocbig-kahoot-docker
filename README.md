@@ -47,3 +47,4 @@ Ce projet est un jeu de quiz en ligne qui permet à plusieurs joueurs de :
 
 - Lancer docker-compose up --build dans le terminal
 - Aller sur http://localhost:8080/home.html pour lancer l'appli
+- Faire attention à ne pas déja utiliser le port 8080
