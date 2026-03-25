@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const editBtn = document.createElement("button");
                 editBtn.textContent = "Éditer";
+                editBtn.style.background = "#782fff";
                 editBtn.onclick = () => window.location.href = `creerquiz.html?edit=${q.id}`;
                 card.appendChild(editBtn);
 
